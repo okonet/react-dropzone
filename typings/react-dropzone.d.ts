@@ -8,9 +8,16 @@ export interface DropzoneProps extends DropzoneOptions {
   children?(state: DropzoneState): JSX.Element;
 }
 
+export enum ErrorCodes {
+ FILE_INVALID_TYPE = 'file-invalid-type',
+ FILE_TOO_LARGE = 'file-too-large',
+ FILE_TOO_SMALL = 'file-too-small',
+ TOO_MANY_FILES = 'too-many-files',
+}
+
 export interface FileError {
   message: string;
-  code: "file-too-large" | "file-too-small" | "too-many-files" | "file-invalid-type" | string;
+  code: ErrorCodes | string;
 }
 
 export interface FileRejection {
