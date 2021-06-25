@@ -810,12 +810,10 @@ function reducer(state, action) {
         isFileDialogActive: false
       }
     case 'setDraggedFiles':
-      /* eslint no-case-declarations: 0 */
-      const { isDragActive, draggedFiles } = action
       return {
         ...state,
-        draggedFiles,
-        isDragActive
+        draggedFiles: action.draggedFiles,
+        isDragActive: action.isDragActive
       }
     case 'setFiles':
       return {
