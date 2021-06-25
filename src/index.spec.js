@@ -1,24 +1,33 @@
 /* eslint react/prop-types: 0, jsx-a11y/label-has-for: 0 */
-import React, { createRef } from 'react'
-import { act, cleanup, fireEvent, render, waitFor } from '@testing-library/react'
-import { renderHook } from '@testing-library/react-hooks'
-import { fromEvent } from 'file-selector'
-import * as utils from './utils'
-import Dropzone, { useDropzone } from './index'
+import React, { createRef } from "react";
+import {
+  act,
+  cleanup,
+  fireEvent,
+  render,
+  waitFor,
+} from "@testing-library/react";
+import { renderHook } from "@testing-library/react-hooks";
+import { fromEvent } from "file-selector";
+import * as utils from "./utils";
+import Dropzone, { useDropzone } from "./index";
 
-describe('useDropzone() hook', () => {
-  let files
-  let images
+describe("useDropzone() hook", () => {
+  let files;
+  let images;
 
   beforeEach(() => {
-    files = [createFile('file1.pdf', 1111, 'application/pdf')]
-    images = [createFile('cats.gif', 1234, 'image/gif'), createFile('dogs.gif', 2345, 'image/jpeg')]
-  })
+    files = [createFile("file1.pdf", 1111, "application/pdf")];
+    images = [
+      createFile("cats.gif", 1234, "image/gif"),
+      createFile("dogs.gif", 2345, "image/jpeg"),
+    ];
+  });
 
-  afterEach(cleanup)
+  afterEach(cleanup);
 
-  describe('behavior', () => {
-    it('renders the root and input nodes with the necessary props', () => {
+  describe("behavior", () => {
+    it("renders the root and input nodes with the necessary props", () => {
       const { container } = render(
         <Dropzone>
           {({ getRootProps, getInputProps }) => (
@@ -27,12 +36,12 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
-      expect(container.innerHTML).toMatchSnapshot()
-    })
+      );
+      expect(container.innerHTML).toMatchSnapshot();
+    });
 
-    it('sets {accept} prop on the <input>', () => {
-      const accept = 'image/jpeg'
+    it("sets {accept} prop on the <input>", () => {
+      const accept = "image/jpeg";
       const { container } = render(
         <Dropzone accept={accept}>
           {({ getRootProps, getInputProps }) => (
@@ -41,14 +50,14 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
+      );
 
-      const input = container.querySelector('input')
+      const input = container.querySelector("input");
 
-      expect(input).toHaveAttribute('accept', accept)
-    })
+      expect(input).toHaveAttribute("accept", accept);
+    });
 
-    it('updates {multiple} prop on the <input> when it changes', () => {
+    it("updates {multiple} prop on the <input> when it changes", () => {
       const { container, rerender } = render(
         <Dropzone accept="image/jpeg">
           {({ getRootProps, getInputProps }) => (
@@ -57,9 +66,12 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
+      );
 
-      expect(container.querySelector('input')).toHaveAttribute('accept', 'image/jpeg')
+      expect(container.querySelector("input")).toHaveAttribute(
+        "accept",
+        "image/jpeg"
+      );
 
       rerender(
         <Dropzone accept="image/png">
@@ -69,12 +81,15 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
+      );
 
-      expect(container.querySelector('input')).toHaveAttribute('accept', 'image/png')
-    })
+      expect(container.querySelector("input")).toHaveAttribute(
+        "accept",
+        "image/png"
+      );
+    });
 
-    it('sets {multiple} prop on the <input>', () => {
+    it("sets {multiple} prop on the <input>", () => {
       const { container } = render(
         <Dropzone multiple>
           {({ getRootProps, getInputProps }) => (
@@ -83,13 +98,13 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
+      );
 
-      const input = container.querySelector('input')
-      expect(input).toHaveAttribute('multiple')
-    })
+      const input = container.querySelector("input");
+      expect(input).toHaveAttribute("multiple");
+    });
 
-    it('updates {multiple} prop on the <input> when it changes', () => {
+    it("updates {multiple} prop on the <input> when it changes", () => {
       const { container, rerender } = render(
         <Dropzone multiple={false}>
           {({ getRootProps, getInputProps }) => (
@@ -98,9 +113,9 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
+      );
 
-      expect(container.querySelector('input')).not.toHaveAttribute('multiple')
+      expect(container.querySelector("input")).not.toHaveAttribute("multiple");
 
       rerender(
         <Dropzone multiple>
@@ -110,13 +125,13 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
+      );
 
-      expect(container.querySelector('input')).toHaveAttribute('multiple')
-    })
+      expect(container.querySelector("input")).toHaveAttribute("multiple");
+    });
 
-    it('sets any props passed to the input props getter on the <input>', () => {
-      const name = 'dropzone-input'
+    it("sets any props passed to the input props getter on the <input>", () => {
+      const name = "dropzone-input";
       const { container } = render(
         <Dropzone multiple>
           {({ getRootProps, getInputProps }) => (
@@ -125,31 +140,31 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
+      );
 
-      const input = container.querySelector('input')
-      expect(input).toHaveAttribute('name', name)
-    })
+      const input = container.querySelector("input");
+      expect(input).toHaveAttribute("name", name);
+    });
 
-    it('sets any props passed to the root props getter on the root node', () => {
-      const ariaLabel = 'Dropzone area'
+    it("sets any props passed to the root props getter on the root node", () => {
+      const ariaLabel = "Dropzone area";
       const { container } = render(
         <Dropzone multiple>
           {({ getRootProps, getInputProps }) => (
-            <div {...getRootProps({ 'aria-label': ariaLabel })}>
+            <div {...getRootProps({ "aria-label": ariaLabel })}>
               <input {...getInputProps()} />
             </div>
           )}
         </Dropzone>
-      )
+      );
 
-      const dropzone = container.querySelector('div')
+      const dropzone = container.querySelector("div");
 
-      expect(dropzone).toHaveAttribute('aria-label', ariaLabel)
-    })
+      expect(dropzone).toHaveAttribute("aria-label", ariaLabel);
+    });
 
-    it('runs the custom callback handlers provided to the root props getter', async () => {
-      const event = createDtWithFiles(files)
+    it("runs the custom callback handlers provided to the root props getter", async () => {
+      const event = createDtWithFiles(files);
 
       const rootProps = {
         onClick: jest.fn(),
@@ -159,8 +174,8 @@ describe('useDropzone() hook', () => {
         onDragEnter: jest.fn(),
         onDragOver: jest.fn(),
         onDragLeave: jest.fn(),
-        onDrop: jest.fn()
-      }
+        onDrop: jest.fn(),
+      };
 
       const ui = (
         <Dropzone>
@@ -170,43 +185,43 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
+      );
 
-      const { container, rerender } = render(ui)
+      const { container, rerender } = render(ui);
 
-      const dropzone = container.querySelector('div')
+      const dropzone = container.querySelector("div");
 
-      fireEvent.click(dropzone)
-      expect(rootProps.onClick).toHaveBeenCalled()
+      fireEvent.click(dropzone);
+      expect(rootProps.onClick).toHaveBeenCalled();
 
-      fireEvent.focus(dropzone)
-      fireEvent.keyDown(dropzone)
-      expect(rootProps.onFocus).toHaveBeenCalled()
-      expect(rootProps.onKeyDown).toHaveBeenCalled()
+      fireEvent.focus(dropzone);
+      fireEvent.keyDown(dropzone);
+      expect(rootProps.onFocus).toHaveBeenCalled();
+      expect(rootProps.onKeyDown).toHaveBeenCalled();
 
-      fireEvent.blur(dropzone)
-      expect(rootProps.onBlur).toHaveBeenCalled()
+      fireEvent.blur(dropzone);
+      expect(rootProps.onBlur).toHaveBeenCalled();
 
-      fireEvent.dragEnter(dropzone, event)
-      await flushPromises(rerender, ui)
-      expect(rootProps.onDragEnter).toHaveBeenCalled()
+      fireEvent.dragEnter(dropzone, event);
+      await flushPromises(rerender, ui);
+      expect(rootProps.onDragEnter).toHaveBeenCalled();
 
-      fireEvent.dragOver(dropzone, event)
-      expect(rootProps.onDragOver).toHaveBeenCalled()
+      fireEvent.dragOver(dropzone, event);
+      expect(rootProps.onDragOver).toHaveBeenCalled();
 
-      fireEvent.dragLeave(dropzone, event)
-      expect(rootProps.onDragLeave).toHaveBeenCalled()
+      fireEvent.dragLeave(dropzone, event);
+      expect(rootProps.onDragLeave).toHaveBeenCalled();
 
-      fireEvent.drop(dropzone, event)
-      await flushPromises(rerender, ui)
-      expect(rootProps.onDrop).toHaveBeenCalled()
-    })
+      fireEvent.drop(dropzone, event);
+      await flushPromises(rerender, ui);
+      expect(rootProps.onDrop).toHaveBeenCalled();
+    });
 
-    it('runs the custom callback handlers provided to the input props getter', async () => {
+    it("runs the custom callback handlers provided to the input props getter", async () => {
       const inputProps = {
         onClick: jest.fn(),
-        onChange: jest.fn()
-      }
+        onChange: jest.fn(),
+      };
 
       const ui = (
         <Dropzone>
@@ -216,23 +231,23 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
+      );
 
-      const { container, rerender } = render(ui)
+      const { container, rerender } = render(ui);
 
-      const input = container.querySelector('input')
+      const input = container.querySelector("input");
 
-      fireEvent.click(input)
-      await flushPromises(rerender, ui)
-      expect(inputProps.onClick).toHaveBeenCalled()
+      fireEvent.click(input);
+      await flushPromises(rerender, ui);
+      expect(inputProps.onClick).toHaveBeenCalled();
 
-      fireEvent.change(input)
-      await flushPromises(rerender, ui)
-      expect(inputProps.onChange).toHaveBeenCalled()
-    })
+      fireEvent.change(input);
+      await flushPromises(rerender, ui);
+      expect(inputProps.onChange).toHaveBeenCalled();
+    });
 
-    it('runs no callback handlers if {disabled} is true', () => {
-      const event = createDtWithFiles(files)
+    it("runs no callback handlers if {disabled} is true", () => {
+      const event = createDtWithFiles(files);
 
       const rootProps = {
         onClick: jest.fn(),
@@ -242,13 +257,13 @@ describe('useDropzone() hook', () => {
         onDragEnter: jest.fn(),
         onDragOver: jest.fn(),
         onDragLeave: jest.fn(),
-        onDrop: jest.fn()
-      }
+        onDrop: jest.fn(),
+      };
 
       const inputProps = {
         onClick: jest.fn(),
-        onChange: jest.fn()
-      }
+        onChange: jest.fn(),
+      };
 
       const { container } = render(
         <Dropzone disabled>
@@ -258,59 +273,59 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
+      );
 
-      const dropzone = container.querySelector('div')
+      const dropzone = container.querySelector("div");
 
-      fireEvent.click(dropzone)
-      expect(rootProps.onClick).not.toHaveBeenCalled()
+      fireEvent.click(dropzone);
+      expect(rootProps.onClick).not.toHaveBeenCalled();
 
-      fireEvent.focus(dropzone)
-      fireEvent.keyDown(dropzone)
-      expect(rootProps.onFocus).not.toHaveBeenCalled()
-      expect(rootProps.onKeyDown).not.toHaveBeenCalled()
+      fireEvent.focus(dropzone);
+      fireEvent.keyDown(dropzone);
+      expect(rootProps.onFocus).not.toHaveBeenCalled();
+      expect(rootProps.onKeyDown).not.toHaveBeenCalled();
 
-      fireEvent.blur(dropzone)
-      expect(rootProps.onBlur).not.toHaveBeenCalled()
+      fireEvent.blur(dropzone);
+      expect(rootProps.onBlur).not.toHaveBeenCalled();
 
-      fireEvent.dragEnter(dropzone, event)
-      expect(rootProps.onDragEnter).not.toHaveBeenCalled()
+      fireEvent.dragEnter(dropzone, event);
+      expect(rootProps.onDragEnter).not.toHaveBeenCalled();
 
-      fireEvent.dragOver(dropzone, event)
-      expect(rootProps.onDragOver).not.toHaveBeenCalled()
+      fireEvent.dragOver(dropzone, event);
+      expect(rootProps.onDragOver).not.toHaveBeenCalled();
 
-      fireEvent.dragLeave(dropzone, event)
-      expect(rootProps.onDragLeave).not.toHaveBeenCalled()
+      fireEvent.dragLeave(dropzone, event);
+      expect(rootProps.onDragLeave).not.toHaveBeenCalled();
 
-      fireEvent.drop(dropzone, event)
-      expect(rootProps.onDrop).not.toHaveBeenCalled()
+      fireEvent.drop(dropzone, event);
+      expect(rootProps.onDrop).not.toHaveBeenCalled();
 
-      const input = container.querySelector('input')
+      const input = container.querySelector("input");
 
-      fireEvent.click(input)
-      expect(inputProps.onClick).not.toHaveBeenCalled()
+      fireEvent.click(input);
+      expect(inputProps.onClick).not.toHaveBeenCalled();
 
-      fireEvent.change(input)
-      expect(inputProps.onChange).not.toHaveBeenCalled()
-    })
+      fireEvent.change(input);
+      expect(inputProps.onChange).not.toHaveBeenCalled();
+    });
 
-    test('{rootRef, inputRef} are exposed', () => {
-      const { result } = renderHook(() => useDropzone())
-      const { rootRef, inputRef, getRootProps, getInputProps } = result.current
+    test("{rootRef, inputRef} are exposed", () => {
+      const { result } = renderHook(() => useDropzone());
+      const { rootRef, inputRef, getRootProps, getInputProps } = result.current;
 
       const { container } = render(
         <div {...getRootProps()}>
           <input {...getInputProps()} />
         </div>
-      )
+      );
 
-      expect(container.querySelector('div')).toEqual(rootRef.current)
-      expect(container.querySelector('input')).toEqual(inputRef.current)
-    })
+      expect(container.querySelector("div")).toEqual(rootRef.current);
+      expect(container.querySelector("input")).toEqual(inputRef.current);
+    });
 
-    test('<Dropzone> exposes and sets the ref if using a ref object', () => {
-      const dropzoneRef = createRef()
-      const onClickSpy = jest.spyOn(HTMLInputElement.prototype, 'click')
+    test("<Dropzone> exposes and sets the ref if using a ref object", () => {
+      const dropzoneRef = createRef();
+      const onClickSpy = jest.spyOn(HTMLInputElement.prototype, "click");
 
       const ui = (
         <Dropzone ref={dropzoneRef}>
@@ -321,25 +336,25 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
+      );
 
-      const { rerender } = render(ui)
+      const { rerender } = render(ui);
 
-      expect(dropzoneRef.current).not.toBeNull()
-      expect(typeof dropzoneRef.current.open).toEqual('function')
+      expect(dropzoneRef.current).not.toBeNull();
+      expect(typeof dropzoneRef.current.open).toEqual("function");
 
-      act(() => dropzoneRef.current.open())
-      expect(onClickSpy).toHaveBeenCalled()
+      act(() => dropzoneRef.current.open());
+      expect(onClickSpy).toHaveBeenCalled();
 
-      rerender(null)
+      rerender(null);
 
-      expect(dropzoneRef.current).toBeNull()
-    })
+      expect(dropzoneRef.current).toBeNull();
+    });
 
-    test('<Dropzone> exposes and sets the ref if using a ref fn', () => {
-      let dropzoneRef
-      const setRef = ref => (dropzoneRef = ref)
-      const onClickSpy = jest.spyOn(HTMLInputElement.prototype, 'click')
+    test("<Dropzone> exposes and sets the ref if using a ref fn", () => {
+      let dropzoneRef;
+      const setRef = (ref) => (dropzoneRef = ref);
+      const onClickSpy = jest.spyOn(HTMLInputElement.prototype, "click");
 
       const ui = (
         <Dropzone ref={setRef}>
@@ -350,22 +365,22 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
+      );
 
-      const { rerender } = render(ui)
+      const { rerender } = render(ui);
 
-      expect(dropzoneRef).not.toBeNull()
-      expect(typeof dropzoneRef.open).toEqual('function')
+      expect(dropzoneRef).not.toBeNull();
+      expect(typeof dropzoneRef.open).toEqual("function");
 
-      act(() => dropzoneRef.open())
-      expect(onClickSpy).toHaveBeenCalled()
+      act(() => dropzoneRef.open());
+      expect(onClickSpy).toHaveBeenCalled();
 
-      rerender(null)
-      expect(dropzoneRef).toBeNull()
-    })
+      rerender(null);
+      expect(dropzoneRef).toBeNull();
+    });
 
     test("<Dropzone> doesn't invoke the ref fn if it hasn't changed", () => {
-      const setRef = jest.fn()
+      const setRef = jest.fn();
 
       const { rerender } = render(
         <Dropzone ref={setRef}>
@@ -375,16 +390,18 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
+      );
 
       rerender(
-        <Dropzone ref={setRef}>{({ getRootProps }) => <div {...getRootProps()} />}</Dropzone>
-      )
+        <Dropzone ref={setRef}>
+          {({ getRootProps }) => <div {...getRootProps()} />}
+        </Dropzone>
+      );
 
-      expect(setRef).toHaveBeenCalledTimes(1)
-    })
+      expect(setRef).toHaveBeenCalledTimes(1);
+    });
 
-    it('sets {isFocused} to false if {disabled} is true', () => {
+    it("sets {isFocused} to false if {disabled} is true", () => {
       const { container, rerender } = render(
         <Dropzone>
           {({ getRootProps, getInputProps, isFocused }) => (
@@ -394,12 +411,12 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
+      );
 
-      const dropzone = container.querySelector('div')
+      const dropzone = container.querySelector("div");
 
-      fireEvent.focus(dropzone)
-      expect(dropzone.querySelector('#focus')).not.toBeNull()
+      fireEvent.focus(dropzone);
+      expect(dropzone.querySelector("#focus")).not.toBeNull();
 
       rerender(
         <Dropzone disabled>
@@ -410,12 +427,12 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
+      );
 
-      expect(dropzone.querySelector('#focus')).toBeNull()
-    })
+      expect(dropzone.querySelector("#focus")).toBeNull();
+    });
 
-    test('{tabindex} is 0 if {disabled} is false', () => {
+    test("{tabindex} is 0 if {disabled} is false", () => {
       const { container } = render(
         <Dropzone>
           {({ getRootProps, getInputProps }) => (
@@ -424,11 +441,11 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
-      expect(container.querySelector('div')).toHaveAttribute('tabindex', '0')
-    })
+      );
+      expect(container.querySelector("div")).toHaveAttribute("tabindex", "0");
+    });
 
-    test('{tabindex} is not set if {disabled} is true', () => {
+    test("{tabindex} is not set if {disabled} is true", () => {
       const { container, rerender } = render(
         <Dropzone>
           {({ getRootProps, getInputProps }) => (
@@ -437,9 +454,9 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
+      );
 
-      expect(container.querySelector('div')).toHaveAttribute('tabindex', '0')
+      expect(container.querySelector("div")).toHaveAttribute("tabindex", "0");
 
       rerender(
         <Dropzone disabled>
@@ -449,12 +466,12 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
+      );
 
-      expect(container.querySelector('div')).not.toHaveAttribute('tabindex')
-    })
+      expect(container.querySelector("div")).not.toHaveAttribute("tabindex");
+    });
 
-    test('{tabindex} is not set if {noKeyboard} is true', () => {
+    test("{tabindex} is not set if {noKeyboard} is true", () => {
       const { container, rerender } = render(
         <Dropzone>
           {({ getRootProps, getInputProps }) => (
@@ -463,9 +480,9 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
+      );
 
-      expect(container.querySelector('div')).toHaveAttribute('tabindex', '0')
+      expect(container.querySelector("div")).toHaveAttribute("tabindex", "0");
 
       rerender(
         <Dropzone noKeyboard>
@@ -475,51 +492,51 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
+      );
 
-      expect(container.querySelector('div')).not.toHaveAttribute('tabindex')
-    })
+      expect(container.querySelector("div")).not.toHaveAttribute("tabindex");
+    });
 
-    test('refs are set when {refKey} is set to a different value', done => {
-      const data = createDtWithFiles(files)
+    test("refs are set when {refKey} is set to a different value", (done) => {
+      const data = createDtWithFiles(files);
 
       class MyView extends React.Component {
         render() {
-          const { children, innerRef, ...rest } = this.props
+          const { children, innerRef, ...rest } = this.props;
           return (
             <div id="dropzone" ref={innerRef} {...rest}>
               <div>{children}</div>
             </div>
-          )
+          );
         }
       }
 
       const ui = (
         <Dropzone>
           {({ getRootProps }) => (
-            <MyView {...getRootProps({ refKey: 'innerRef' })}>
+            <MyView {...getRootProps({ refKey: "innerRef" })}>
               <span>Drop some files here ...</span>
             </MyView>
           )}
         </Dropzone>
-      )
+      );
 
-      const { container, rerender } = render(ui)
-      const dropzone = container.querySelector('#dropzone')
+      const { container, rerender } = render(ui);
+      const dropzone = container.querySelector("#dropzone");
 
       const fn = async () => {
-        fireDrop(dropzone, data)
-        await flushPromises(rerender, ui)
-        done()
-      }
+        fireDrop(dropzone, data);
+        await flushPromises(rerender, ui);
+        done();
+      };
 
-      expect(fn).not.toThrow()
-    })
+      expect(fn).not.toThrow();
+    });
 
-    test('click events originating from <label> should not trigger file dialog open twice', () => {
-      const activeRef = createRef()
-      const active = <span ref={activeRef}>I am active</span>
-      const onClickSpy = jest.spyOn(HTMLInputElement.prototype, 'click')
+    test("click events originating from <label> should not trigger file dialog open twice", () => {
+      const activeRef = createRef();
+      const active = <span ref={activeRef}>I am active</span>;
+      const onClickSpy = jest.spyOn(HTMLInputElement.prototype, "click");
 
       const { container } = render(
         <Dropzone>
@@ -530,35 +547,35 @@ describe('useDropzone() hook', () => {
             </label>
           )}
         </Dropzone>
-      )
+      );
 
-      const dropzone = container.querySelector('label')
+      const dropzone = container.querySelector("label");
 
-      const event = new Event('click', { bubbles: true, cancelable: true })
+      const event = new Event("click", { bubbles: true, cancelable: true });
 
-      fireEvent(dropzone, event)
+      fireEvent(dropzone, event);
 
-      const ref = activeRef.current
-      expect(ref).not.toBeNull()
-      expect(dropzone).toContainElement(ref)
-      expect(onClickSpy).toHaveBeenCalledTimes(1)
-    })
-  })
+      const ref = activeRef.current;
+      expect(ref).not.toBeNull();
+      expect(dropzone).toContainElement(ref);
+      expect(onClickSpy).toHaveBeenCalledTimes(1);
+    });
+  });
 
-  describe('document drop protection', () => {
-    const addEventListenerSpy = jest.spyOn(document, 'addEventListener')
-    const removeEventListenerSpy = jest.spyOn(document, 'removeEventListener')
+  describe("document drop protection", () => {
+    const addEventListenerSpy = jest.spyOn(document, "addEventListener");
+    const removeEventListenerSpy = jest.spyOn(document, "removeEventListener");
     // Collect the list of addEventListener/removeEventListener spy calls into an object keyed by event name
-    const collectEventListenerCalls = spy =>
+    const collectEventListenerCalls = (spy) =>
       spy.mock.calls.reduce(
         (acc, [eventName, ...rest]) => ({
           ...acc,
-          [eventName]: rest
+          [eventName]: rest,
         }),
         {}
-      )
+      );
 
-    it('installs hooks to prevent stray drops from taking over the browser window', () => {
+    it("installs hooks to prevent stray drops from taking over the browser window", () => {
       render(
         <Dropzone>
           {({ getRootProps, getInputProps }) => (
@@ -567,24 +584,24 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
+      );
 
-      expect(addEventListenerSpy).toHaveBeenCalledTimes(2)
+      expect(addEventListenerSpy).toHaveBeenCalledTimes(2);
 
-      const addEventCalls = collectEventListenerCalls(addEventListenerSpy)
-      const events = Object.keys(addEventCalls)
+      const addEventCalls = collectEventListenerCalls(addEventListenerSpy);
+      const events = Object.keys(addEventCalls);
 
-      expect(events).toContain('dragover')
-      expect(events).toContain('drop')
+      expect(events).toContain("dragover");
+      expect(events).toContain("drop");
 
-      events.forEach(eventName => {
-        const [fn, options] = addEventCalls[eventName]
-        expect(fn).toBeDefined()
-        expect(options).toBe(false)
-      })
-    })
+      events.forEach((eventName) => {
+        const [fn, options] = addEventCalls[eventName];
+        expect(fn).toBeDefined();
+        expect(options).toBe(false);
+      });
+    });
 
-    it('removes document hooks when unmounted', () => {
+    it("removes document hooks when unmounted", () => {
       const { unmount } = render(
         <Dropzone>
           {({ getRootProps, getInputProps }) => (
@@ -593,27 +610,29 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
+      );
 
-      unmount()
+      unmount();
 
-      expect(removeEventListenerSpy).toHaveBeenCalledTimes(2)
+      expect(removeEventListenerSpy).toHaveBeenCalledTimes(2);
 
-      const addEventCalls = collectEventListenerCalls(addEventListenerSpy)
-      const removeEventCalls = collectEventListenerCalls(removeEventListenerSpy)
-      const events = Object.keys(removeEventCalls)
+      const addEventCalls = collectEventListenerCalls(addEventListenerSpy);
+      const removeEventCalls = collectEventListenerCalls(
+        removeEventListenerSpy
+      );
+      const events = Object.keys(removeEventCalls);
 
-      expect(events).toContain('dragover')
-      expect(events).toContain('drop')
+      expect(events).toContain("dragover");
+      expect(events).toContain("drop");
 
-      events.forEach(eventName => {
-        const [a] = addEventCalls[eventName]
-        const [b] = removeEventCalls[eventName]
-        expect(a).toEqual(b)
-      })
-    })
+      events.forEach((eventName) => {
+        const [a] = addEventCalls[eventName];
+        const [b] = removeEventCalls[eventName];
+        expect(a).toEqual(b);
+      });
+    });
 
-    it('terminates drags and drops on elements outside our dropzone', () => {
+    it("terminates drags and drops on elements outside our dropzone", () => {
       render(
         <Dropzone>
           {({ getRootProps, getInputProps }) => (
@@ -622,20 +641,20 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
+      );
 
-      const dragEvt = new Event('dragover', { bubbles: true })
-      const dragEvtPreventDefaultSpy = jest.spyOn(dragEvt, 'preventDefault')
-      fireEvent(document.body, dragEvt)
-      expect(dragEvtPreventDefaultSpy).toHaveBeenCalled()
+      const dragEvt = new Event("dragover", { bubbles: true });
+      const dragEvtPreventDefaultSpy = jest.spyOn(dragEvt, "preventDefault");
+      fireEvent(document.body, dragEvt);
+      expect(dragEvtPreventDefaultSpy).toHaveBeenCalled();
 
-      const dropEvt = new Event('drop', { bubbles: true })
-      const dropEvtPreventDefaultSpy = jest.spyOn(dropEvt, 'preventDefault')
-      fireEvent(document.body, dropEvt)
-      expect(dropEvtPreventDefaultSpy).toHaveBeenCalled()
-    })
+      const dropEvt = new Event("drop", { bubbles: true });
+      const dropEvtPreventDefaultSpy = jest.spyOn(dropEvt, "preventDefault");
+      fireEvent(document.body, dropEvt);
+      expect(dropEvtPreventDefaultSpy).toHaveBeenCalled();
+    });
 
-    it('permits drags and drops on elements inside our dropzone', () => {
+    it("permits drags and drops on elements inside our dropzone", () => {
       const { container } = render(
         <Dropzone>
           {({ getRootProps, getInputProps }) => (
@@ -644,19 +663,19 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
-      const dropzone = container.querySelector('div')
+      );
+      const dropzone = container.querySelector("div");
 
-      const dropEvt = new Event('drop', { bubbles: true })
-      const dropEvtPreventDefaultSpy = jest.spyOn(dropEvt, 'preventDefault')
+      const dropEvt = new Event("drop", { bubbles: true });
+      const dropEvtPreventDefaultSpy = jest.spyOn(dropEvt, "preventDefault");
 
-      fireEvent(dropzone, dropEvt)
+      fireEvent(dropzone, dropEvt);
       // A call is from the onDrop handler for the dropzone,
       // but there should be no more than 1
-      expect(dropEvtPreventDefaultSpy).toHaveBeenCalled()
-    })
+      expect(dropEvtPreventDefaultSpy).toHaveBeenCalled();
+    });
 
-    it('does not prevent stray drops when {preventDropOnDocument} is false', () => {
+    it("does not prevent stray drops when {preventDropOnDocument} is false", () => {
       render(
         <Dropzone preventDropOnDocument={false}>
           {({ getRootProps, getInputProps }) => (
@@ -665,25 +684,25 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
+      );
 
-      const dropEvt = new Event('drop', { bubbles: true })
-      const dropEvtPreventDefaultSpy = jest.spyOn(dropEvt, 'preventDefault')
-      fireEvent(document.body, dropEvt)
-      expect(dropEvtPreventDefaultSpy).toHaveBeenCalledTimes(0)
-    })
-  })
+      const dropEvt = new Event("drop", { bubbles: true });
+      const dropEvtPreventDefaultSpy = jest.spyOn(dropEvt, "preventDefault");
+      fireEvent(document.body, dropEvt);
+      expect(dropEvtPreventDefaultSpy).toHaveBeenCalledTimes(0);
+    });
+  });
 
-  describe('event propagation', () => {
-    const data = createDtWithFiles(files)
+  describe("event propagation", () => {
+    const data = createDtWithFiles(files);
 
-    test('drag events propagate from the inner dropzone to parents', async () => {
+    test("drag events propagate from the inner dropzone to parents", async () => {
       const innerProps = {
         onDragEnter: jest.fn(),
         onDragOver: jest.fn(),
         onDragLeave: jest.fn(),
-        onDrop: jest.fn()
-      }
+        onDrop: jest.fn(),
+      };
 
       const InnerDropzone = () => (
         <Dropzone {...innerProps}>
@@ -693,14 +712,14 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
+      );
 
       const parentProps = {
         onDragEnter: jest.fn(),
         onDragOver: jest.fn(),
         onDragLeave: jest.fn(),
-        onDrop: jest.fn()
-      }
+        onDrop: jest.fn(),
+      };
 
       const ui = (
         <Dropzone {...parentProps}>
@@ -711,45 +730,45 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
+      );
 
-      const { container, rerender } = render(ui)
+      const { container, rerender } = render(ui);
 
-      const innerDropzone = container.querySelector('#inner-dropzone')
+      const innerDropzone = container.querySelector("#inner-dropzone");
 
-      fireDragEnter(innerDropzone, data)
-      await flushPromises(rerender, ui)
-      expect(innerProps.onDragEnter).toHaveBeenCalled()
-      expect(parentProps.onDragEnter).toHaveBeenCalled()
+      fireDragEnter(innerDropzone, data);
+      await flushPromises(rerender, ui);
+      expect(innerProps.onDragEnter).toHaveBeenCalled();
+      expect(parentProps.onDragEnter).toHaveBeenCalled();
 
-      fireDragOver(innerDropzone, data)
-      expect(innerProps.onDragOver).toHaveBeenCalled()
-      expect(parentProps.onDragOver).toHaveBeenCalled()
+      fireDragOver(innerDropzone, data);
+      expect(innerProps.onDragOver).toHaveBeenCalled();
+      expect(parentProps.onDragOver).toHaveBeenCalled();
 
-      fireDragLeave(innerDropzone, data)
-      expect(innerProps.onDragLeave).toHaveBeenCalled()
-      expect(parentProps.onDragLeave).toHaveBeenCalled()
+      fireDragLeave(innerDropzone, data);
+      expect(innerProps.onDragLeave).toHaveBeenCalled();
+      expect(parentProps.onDragLeave).toHaveBeenCalled();
 
-      fireDrop(innerDropzone, data)
-      await flushPromises(rerender, ui)
-      expect(innerProps.onDrop).toHaveBeenCalled()
-      expect(parentProps.onDrop).toHaveBeenCalled()
-    })
+      fireDrop(innerDropzone, data);
+      await flushPromises(rerender, ui);
+      expect(innerProps.onDrop).toHaveBeenCalled();
+      expect(parentProps.onDrop).toHaveBeenCalled();
+    });
 
-    test('drag events do not propagate from the inner dropzone to parent dropzone if user invoked stopPropagation() on the events', async () => {
+    test("drag events do not propagate from the inner dropzone to parent dropzone if user invoked stopPropagation() on the events", async () => {
       const innerProps = {
         onDragEnter: jest.fn(),
         onDragOver: jest.fn(),
         onDragLeave: jest.fn(),
-        onDrop: jest.fn()
-      }
+        onDrop: jest.fn(),
+      };
 
-      Object.keys(innerProps).forEach(prop =>
+      Object.keys(innerProps).forEach((prop) =>
         innerProps[prop].mockImplementation((...args) => {
-          const event = prop === 'onDrop' ? args.pop() : args.shift()
-          event.stopPropagation()
+          const event = prop === "onDrop" ? args.pop() : args.shift();
+          event.stopPropagation();
         })
-      )
+      );
 
       const InnerDropzone = () => (
         <Dropzone {...innerProps}>
@@ -759,14 +778,14 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
+      );
 
       const parentProps = {
         onDragEnter: jest.fn(),
         onDragOver: jest.fn(),
         onDragLeave: jest.fn(),
-        onDrop: jest.fn()
-      }
+        onDrop: jest.fn(),
+      };
 
       const ui = (
         <Dropzone {...parentProps}>
@@ -777,38 +796,38 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
+      );
 
-      const { container, rerender } = render(ui)
+      const { container, rerender } = render(ui);
 
-      const innerDropzone = container.querySelector('#inner-dropzone')
+      const innerDropzone = container.querySelector("#inner-dropzone");
 
-      fireDragEnter(innerDropzone, data)
-      await flushPromises(rerender, ui)
-      expect(innerProps.onDragEnter).toHaveBeenCalled()
-      expect(parentProps.onDragEnter).not.toHaveBeenCalled()
+      fireDragEnter(innerDropzone, data);
+      await flushPromises(rerender, ui);
+      expect(innerProps.onDragEnter).toHaveBeenCalled();
+      expect(parentProps.onDragEnter).not.toHaveBeenCalled();
 
-      fireDragOver(innerDropzone, data)
-      expect(innerProps.onDragOver).toHaveBeenCalled()
-      expect(parentProps.onDragOver).not.toHaveBeenCalled()
+      fireDragOver(innerDropzone, data);
+      expect(innerProps.onDragOver).toHaveBeenCalled();
+      expect(parentProps.onDragOver).not.toHaveBeenCalled();
 
-      fireDragLeave(innerDropzone, data)
-      expect(innerProps.onDragLeave).toHaveBeenCalled()
-      expect(parentProps.onDragLeave).not.toHaveBeenCalled()
+      fireDragLeave(innerDropzone, data);
+      expect(innerProps.onDragLeave).toHaveBeenCalled();
+      expect(parentProps.onDragLeave).not.toHaveBeenCalled();
 
-      fireDrop(innerDropzone, data)
-      await flushPromises(rerender, ui)
-      expect(innerProps.onDrop).toHaveBeenCalled()
-      expect(parentProps.onDrop).not.toHaveBeenCalled()
-    })
+      fireDrop(innerDropzone, data);
+      await flushPromises(rerender, ui);
+      expect(innerProps.onDrop).toHaveBeenCalled();
+      expect(parentProps.onDrop).not.toHaveBeenCalled();
+    });
 
-    test('drag events do not propagate from the inner dropzone to parent dropzone if {noDragEventsBubbling} is true', async () => {
+    test("drag events do not propagate from the inner dropzone to parent dropzone if {noDragEventsBubbling} is true", async () => {
       const innerProps = {
         onDragEnter: jest.fn(),
         onDragOver: jest.fn(),
         onDragLeave: jest.fn(),
-        onDrop: jest.fn()
-      }
+        onDrop: jest.fn(),
+      };
 
       const InnerDropzone = () => (
         <Dropzone {...innerProps} noDragEventsBubbling>
@@ -818,14 +837,14 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
+      );
 
       const parentProps = {
         onDragEnter: jest.fn(),
         onDragOver: jest.fn(),
         onDragLeave: jest.fn(),
-        onDrop: jest.fn()
-      }
+        onDrop: jest.fn(),
+      };
 
       const ui = (
         <Dropzone {...parentProps}>
@@ -836,38 +855,38 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
+      );
 
-      const { container, rerender } = render(ui)
+      const { container, rerender } = render(ui);
 
-      const outerDropzone = container.querySelector('#outer-dropzone')
-      const innerDropzone = container.querySelector('#inner-dropzone')
+      const outerDropzone = container.querySelector("#outer-dropzone");
+      const innerDropzone = container.querySelector("#inner-dropzone");
 
       // Sets drag targets on the outer dropzone
-      fireDragEnter(outerDropzone, data)
-      await flushPromises(rerender, ui)
+      fireDragEnter(outerDropzone, data);
+      await flushPromises(rerender, ui);
 
-      fireDragEnter(innerDropzone, data)
-      await flushPromises(rerender, ui)
-      expect(innerProps.onDragEnter).toHaveBeenCalled()
-      expect(parentProps.onDragEnter).toHaveBeenCalledTimes(1)
+      fireDragEnter(innerDropzone, data);
+      await flushPromises(rerender, ui);
+      expect(innerProps.onDragEnter).toHaveBeenCalled();
+      expect(parentProps.onDragEnter).toHaveBeenCalledTimes(1);
 
-      fireDragOver(innerDropzone, data)
-      expect(innerProps.onDragOver).toHaveBeenCalled()
-      expect(parentProps.onDragOver).not.toHaveBeenCalled()
+      fireDragOver(innerDropzone, data);
+      expect(innerProps.onDragOver).toHaveBeenCalled();
+      expect(parentProps.onDragOver).not.toHaveBeenCalled();
 
-      fireDragLeave(innerDropzone, data)
-      expect(innerProps.onDragLeave).toHaveBeenCalled()
-      expect(parentProps.onDragLeave).not.toHaveBeenCalled()
+      fireDragLeave(innerDropzone, data);
+      expect(innerProps.onDragLeave).toHaveBeenCalled();
+      expect(parentProps.onDragLeave).not.toHaveBeenCalled();
 
-      fireDrop(innerDropzone, data)
-      await flushPromises(rerender, ui)
-      expect(innerProps.onDrop).toHaveBeenCalled()
-      expect(parentProps.onDrop).not.toHaveBeenCalled()
-    })
+      fireDrop(innerDropzone, data);
+      await flushPromises(rerender, ui);
+      expect(innerProps.onDrop).toHaveBeenCalled();
+      expect(parentProps.onDrop).not.toHaveBeenCalled();
+    });
 
-    test('onDragLeave is not invoked for the parent dropzone if it was invoked for an inner dropzone', async () => {
-      const innerDragLeave = jest.fn()
+    test("onDragLeave is not invoked for the parent dropzone if it was invoked for an inner dropzone", async () => {
+      const innerDragLeave = jest.fn();
       const InnerDropzone = () => (
         <Dropzone onDragLeave={innerDragLeave}>
           {({ getRootProps, getInputProps }) => (
@@ -876,9 +895,9 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
+      );
 
-      const parentDragLeave = jest.fn()
+      const parentDragLeave = jest.fn();
       const ui = (
         <Dropzone onDragLeave={parentDragLeave}>
           {({ getRootProps, getInputProps }) => (
@@ -888,36 +907,38 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
+      );
 
-      const { container, rerender } = render(ui)
+      const { container, rerender } = render(ui);
 
-      const parentDropzone = container.querySelector('#parent-dropzone')
+      const parentDropzone = container.querySelector("#parent-dropzone");
 
-      fireDragEnter(parentDropzone, data)
-      await flushPromises(rerender, ui)
+      fireDragEnter(parentDropzone, data);
+      await flushPromises(rerender, ui);
 
-      const innerDropzone = container.querySelector('#inner-dropzone')
-      fireDragEnter(innerDropzone, data)
-      await flushPromises(rerender, ui)
+      const innerDropzone = container.querySelector("#inner-dropzone");
+      fireDragEnter(innerDropzone, data);
+      await flushPromises(rerender, ui);
 
-      fireDragLeave(innerDropzone, data)
-      expect(innerDragLeave).toHaveBeenCalled()
-      expect(parentDragLeave).not.toHaveBeenCalled()
-    })
-  })
+      fireDragLeave(innerDropzone, data);
+      expect(innerDragLeave).toHaveBeenCalled();
+      expect(parentDragLeave).not.toHaveBeenCalled();
+    });
+  });
 
-  describe('plugin integration', () => {
-    it('uses provided getFilesFromEvent()', async () => {
-      const data = createDtWithFiles(files)
+  describe("plugin integration", () => {
+    it("uses provided getFilesFromEvent()", async () => {
+      const data = createDtWithFiles(files);
 
       const props = {
-        getFilesFromEvent: jest.fn().mockImplementation(event => fromEvent(event)),
+        getFilesFromEvent: jest
+          .fn()
+          .mockImplementation((event) => fromEvent(event)),
         onDragEnter: jest.fn(),
         onDragOver: jest.fn(),
         onDragLeave: jest.fn(),
-        onDrop: jest.fn()
-      }
+        onDrop: jest.fn(),
+      };
 
       const ui = (
         <Dropzone {...props}>
@@ -927,30 +948,30 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
-      const { container, rerender } = render(ui)
-      const dropzone = container.querySelector('div')
+      );
+      const { container, rerender } = render(ui);
+      const dropzone = container.querySelector("div");
 
-      fireDragEnter(dropzone, data)
-      await flushPromises(rerender, ui)
-      expect(props.onDragEnter).toHaveBeenCalled()
+      fireDragEnter(dropzone, data);
+      await flushPromises(rerender, ui);
+      expect(props.onDragEnter).toHaveBeenCalled();
 
-      fireDragOver(dropzone, data)
-      expect(props.onDragOver).toHaveBeenCalled()
+      fireDragOver(dropzone, data);
+      expect(props.onDragOver).toHaveBeenCalled();
 
-      fireDragLeave(dropzone, data)
-      expect(props.onDragLeave).toHaveBeenCalled()
+      fireDragLeave(dropzone, data);
+      expect(props.onDragLeave).toHaveBeenCalled();
 
-      fireDrop(dropzone, data)
-      await flushPromises(rerender, ui)
-      expect(props.onDrop).toHaveBeenCalled()
+      fireDrop(dropzone, data);
+      await flushPromises(rerender, ui);
+      expect(props.onDrop).toHaveBeenCalled();
 
-      expect(props.getFilesFromEvent).toHaveBeenCalledTimes(2)
-    })
-  })
+      expect(props.getFilesFromEvent).toHaveBeenCalledTimes(2);
+    });
+  });
 
-  describe('onFocus', () => {
-    it('sets focus state', () => {
+  describe("onFocus", () => {
+    it("sets focus state", () => {
       const { container } = render(
         <Dropzone>
           {({ getRootProps, getInputProps, isFocused }) => (
@@ -960,33 +981,35 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
+      );
 
-      const dropzone = container.querySelector('div')
+      const dropzone = container.querySelector("div");
 
-      fireEvent.focus(dropzone)
-      expect(dropzone.querySelector('#focus')).not.toBeNull()
-    })
+      fireEvent.focus(dropzone);
+      expect(dropzone.querySelector("#focus")).not.toBeNull();
+    });
 
-    it('does not set focus state if user stopped event propagation', () => {
+    it("does not set focus state if user stopped event propagation", () => {
       const { container } = render(
         <Dropzone>
           {({ getRootProps, getInputProps, isFocused }) => (
-            <div {...getRootProps({ onFocus: event => event.stopPropagation() })}>
+            <div
+              {...getRootProps({ onFocus: (event) => event.stopPropagation() })}
+            >
               <input {...getInputProps()} />
               {isFocused && <div id="focus" />}
             </div>
           )}
         </Dropzone>
-      )
+      );
 
-      const dropzone = container.querySelector('div')
+      const dropzone = container.querySelector("div");
 
-      fireEvent.focus(dropzone)
-      expect(dropzone.querySelector('#focus')).toBeNull()
-    })
+      fireEvent.focus(dropzone);
+      expect(dropzone.querySelector("#focus")).toBeNull();
+    });
 
-    it('does not set focus state if {noKeyboard} is true', () => {
+    it("does not set focus state if {noKeyboard} is true", () => {
       const { container } = render(
         <Dropzone noKeyboard>
           {({ getRootProps, getInputProps, isFocused }) => (
@@ -996,15 +1019,15 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
+      );
 
-      const dropzone = container.querySelector('div')
+      const dropzone = container.querySelector("div");
 
-      fireEvent.focus(dropzone)
-      expect(dropzone.querySelector('#focus')).toBeNull()
-    })
+      fireEvent.focus(dropzone);
+      expect(dropzone.querySelector("#focus")).toBeNull();
+    });
 
-    it('restores focus behavior if {noKeyboard} is set back to false', () => {
+    it("restores focus behavior if {noKeyboard} is set back to false", () => {
       const { container, rerender } = render(
         <Dropzone noKeyboard>
           {({ getRootProps, getInputProps, isFocused }) => (
@@ -1014,12 +1037,12 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
+      );
 
-      const dropzone = container.querySelector('div')
+      const dropzone = container.querySelector("div");
 
-      fireEvent.focus(dropzone)
-      expect(dropzone.querySelector('#focus')).toBeNull()
+      fireEvent.focus(dropzone);
+      expect(dropzone.querySelector("#focus")).toBeNull();
 
       rerender(
         <Dropzone noKeyboard={false}>
@@ -1030,15 +1053,15 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
+      );
 
-      fireEvent.focus(dropzone)
-      expect(dropzone.querySelector('#focus')).not.toBeNull()
-    })
-  })
+      fireEvent.focus(dropzone);
+      expect(dropzone.querySelector("#focus")).not.toBeNull();
+    });
+  });
 
-  describe('onBlur', () => {
-    it('unsets focus state', () => {
+  describe("onBlur", () => {
+    it("unsets focus state", () => {
       const { container } = render(
         <Dropzone>
           {({ getRootProps, getInputProps, isFocused }) => (
@@ -1048,38 +1071,40 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
+      );
 
-      const dropzone = container.querySelector('div')
+      const dropzone = container.querySelector("div");
 
-      fireEvent.focus(dropzone)
-      expect(dropzone.querySelector('#focus')).not.toBeNull()
+      fireEvent.focus(dropzone);
+      expect(dropzone.querySelector("#focus")).not.toBeNull();
 
-      fireEvent.blur(dropzone)
-      expect(dropzone.querySelector('#focus')).toBeNull()
-    })
+      fireEvent.blur(dropzone);
+      expect(dropzone.querySelector("#focus")).toBeNull();
+    });
 
-    it('does not unset focus state if user stopped event propagation', () => {
+    it("does not unset focus state if user stopped event propagation", () => {
       const { container } = render(
         <Dropzone>
           {({ getRootProps, getInputProps, isFocused }) => (
-            <div {...getRootProps({ onBlur: event => event.stopPropagation() })}>
+            <div
+              {...getRootProps({ onBlur: (event) => event.stopPropagation() })}
+            >
               <input {...getInputProps()} />
               {isFocused && <div id="focus" />}
             </div>
           )}
         </Dropzone>
-      )
+      );
 
-      const dropzone = container.querySelector('div')
+      const dropzone = container.querySelector("div");
 
-      fireEvent.focus(dropzone)
-      expect(dropzone.querySelector('#focus')).not.toBeNull()
-      fireEvent.blur(dropzone)
-      expect(dropzone.querySelector('#focus')).not.toBeNull()
-    })
+      fireEvent.focus(dropzone);
+      expect(dropzone.querySelector("#focus")).not.toBeNull();
+      fireEvent.blur(dropzone);
+      expect(dropzone.querySelector("#focus")).not.toBeNull();
+    });
 
-    it('does not unset focus state if {noKeyboard} is true', () => {
+    it("does not unset focus state if {noKeyboard} is true", () => {
       const { container, rerender } = render(
         <Dropzone>
           {({ getRootProps, getInputProps, isFocused }) => (
@@ -1089,12 +1114,12 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
+      );
 
-      const dropzone = container.querySelector('div')
+      const dropzone = container.querySelector("div");
 
-      fireEvent.focus(dropzone)
-      expect(dropzone.querySelector('#focus')).not.toBeNull()
+      fireEvent.focus(dropzone);
+      expect(dropzone.querySelector("#focus")).not.toBeNull();
 
       rerender(
         <Dropzone noKeyboard>
@@ -1105,13 +1130,13 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
+      );
 
-      fireEvent.blur(dropzone)
-      expect(dropzone.querySelector('#focus')).not.toBeNull()
-    })
+      fireEvent.blur(dropzone);
+      expect(dropzone.querySelector("#focus")).not.toBeNull();
+    });
 
-    it('restores blur behavior if {noKeyboard} is set back to false', () => {
+    it("restores blur behavior if {noKeyboard} is set back to false", () => {
       const { container, rerender } = render(
         <Dropzone>
           {({ getRootProps, getInputProps, isFocused }) => (
@@ -1121,12 +1146,12 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
+      );
 
-      const dropzone = container.querySelector('div')
+      const dropzone = container.querySelector("div");
 
-      fireEvent.focus(dropzone)
-      expect(dropzone.querySelector('#focus')).not.toBeNull()
+      fireEvent.focus(dropzone);
+      expect(dropzone.querySelector("#focus")).not.toBeNull();
 
       rerender(
         <Dropzone noKeyboard>
@@ -1137,10 +1162,10 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
+      );
 
-      fireEvent.blur(dropzone)
-      expect(dropzone.querySelector('#focus')).not.toBeNull()
+      fireEvent.blur(dropzone);
+      expect(dropzone.querySelector("#focus")).not.toBeNull();
 
       rerender(
         <Dropzone noKeyboard={false}>
@@ -1151,18 +1176,18 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
+      );
 
-      fireEvent.blur(dropzone)
-      expect(dropzone.querySelector('#focus')).toBeNull()
-    })
-  })
+      fireEvent.blur(dropzone);
+      expect(dropzone.querySelector("#focus")).toBeNull();
+    });
+  });
 
-  describe('onClick', () => {
-    it('should proxy the click event to the input', () => {
-      const activeRef = createRef()
-      const active = <span ref={activeRef}>I am active</span>
-      const onClickSpy = jest.spyOn(HTMLInputElement.prototype, 'click')
+  describe("onClick", () => {
+    it("should proxy the click event to the input", () => {
+      const activeRef = createRef();
+      const active = <span ref={activeRef}>I am active</span>;
+      const onClickSpy = jest.spyOn(HTMLInputElement.prototype, "click");
 
       const { container } = render(
         <Dropzone>
@@ -1173,37 +1198,39 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
+      );
 
-      const dropzone = container.querySelector('div')
+      const dropzone = container.querySelector("div");
 
-      fireEvent.click(dropzone)
-      const ref = activeRef.current
-      expect(ref).not.toBeNull()
-      expect(dropzone).toContainElement(ref)
-      expect(onClickSpy).toHaveBeenCalled()
-    })
+      fireEvent.click(dropzone);
+      const ref = activeRef.current;
+      expect(ref).not.toBeNull();
+      expect(dropzone).toContainElement(ref);
+      expect(onClickSpy).toHaveBeenCalled();
+    });
 
-    it('should not not proxy the click event to the input if event propagation was stopped', () => {
-      const onClickSpy = jest.spyOn(HTMLInputElement.prototype, 'click')
+    it("should not not proxy the click event to the input if event propagation was stopped", () => {
+      const onClickSpy = jest.spyOn(HTMLInputElement.prototype, "click");
       const { container } = render(
         <Dropzone>
           {({ getRootProps, getInputProps }) => (
-            <div {...getRootProps({ onClick: event => event.stopPropagation() })}>
+            <div
+              {...getRootProps({ onClick: (event) => event.stopPropagation() })}
+            >
               <input {...getInputProps()} />
             </div>
           )}
         </Dropzone>
-      )
+      );
 
-      const dropzone = container.querySelector('div')
+      const dropzone = container.querySelector("div");
 
-      fireEvent.click(dropzone)
-      expect(onClickSpy).not.toHaveBeenCalled()
-    })
+      fireEvent.click(dropzone);
+      expect(onClickSpy).not.toHaveBeenCalled();
+    });
 
-    it('should not not proxy the click event to the input if {noClick} is true', () => {
-      const onClickSpy = jest.spyOn(HTMLInputElement.prototype, 'click')
+    it("should not not proxy the click event to the input if {noClick} is true", () => {
+      const onClickSpy = jest.spyOn(HTMLInputElement.prototype, "click");
       const { container } = render(
         <Dropzone noClick>
           {({ getRootProps, getInputProps }) => (
@@ -1212,16 +1239,16 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
+      );
 
-      const dropzone = container.querySelector('div')
+      const dropzone = container.querySelector("div");
 
-      fireEvent.click(dropzone)
-      expect(onClickSpy).not.toHaveBeenCalled()
-    })
+      fireEvent.click(dropzone);
+      expect(onClickSpy).not.toHaveBeenCalled();
+    });
 
-    it('restores click behavior if {noClick} is set back to false', () => {
-      const onClickSpy = jest.spyOn(HTMLInputElement.prototype, 'click')
+    it("restores click behavior if {noClick} is set back to false", () => {
+      const onClickSpy = jest.spyOn(HTMLInputElement.prototype, "click");
       const { container, rerender } = render(
         <Dropzone noClick>
           {({ getRootProps, getInputProps }) => (
@@ -1230,12 +1257,12 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
+      );
 
-      const dropzone = container.querySelector('div')
+      const dropzone = container.querySelector("div");
 
-      fireEvent.click(dropzone)
-      expect(onClickSpy).not.toHaveBeenCalled()
+      fireEvent.click(dropzone);
+      expect(onClickSpy).not.toHaveBeenCalled();
 
       rerender(
         <Dropzone noClick={false}>
@@ -1245,16 +1272,16 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
+      );
 
-      fireEvent.click(dropzone)
-      expect(onClickSpy).toHaveBeenCalled()
-    })
+      fireEvent.click(dropzone);
+      expect(onClickSpy).toHaveBeenCalled();
+    });
 
     // https://github.com/react-dropzone/react-dropzone/issues/783
-    it('should continue event propagation if {noClick} is true', () => {
-      const btnClickSpy = jest.fn()
-      const inputClickSpy = jest.spyOn(HTMLInputElement.prototype, 'click')
+    it("should continue event propagation if {noClick} is true", () => {
+      const btnClickSpy = jest.fn();
+      const inputClickSpy = jest.spyOn(HTMLInputElement.prototype, "click");
       const { container } = render(
         <Dropzone noClick>
           {({ getRootProps, getInputProps }) => (
@@ -1264,23 +1291,25 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
+      );
 
-      const dropzone = container.querySelector('div')
-      const btn = container.querySelector('button')
+      const dropzone = container.querySelector("div");
+      const btn = container.querySelector("button");
 
-      fireEvent.click(dropzone)
-      expect(inputClickSpy).not.toHaveBeenCalled()
+      fireEvent.click(dropzone);
+      expect(inputClickSpy).not.toHaveBeenCalled();
 
-      fireEvent.click(btn)
-      expect(btnClickSpy).toHaveBeenCalled()
-    })
+      fireEvent.click(btn);
+      expect(btnClickSpy).toHaveBeenCalled();
+    });
 
-    it('should schedule input click on next tick in Edge', () => {
-      jest.useFakeTimers()
+    it("should schedule input click on next tick in Edge", () => {
+      jest.useFakeTimers();
 
-      const isIeOrEdgeSpy = jest.spyOn(utils, 'isIeOrEdge').mockReturnValueOnce(true)
-      const onClickSpy = jest.spyOn(HTMLInputElement.prototype, 'click')
+      const isIeOrEdgeSpy = jest
+        .spyOn(utils, "isIeOrEdge")
+        .mockReturnValueOnce(true);
+      const onClickSpy = jest.spyOn(HTMLInputElement.prototype, "click");
 
       const ui = (
         <Dropzone>
@@ -1290,26 +1319,26 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
+      );
 
-      const { container } = render(ui)
+      const { container } = render(ui);
 
-      const dropzone = container.querySelector('div')
+      const dropzone = container.querySelector("div");
 
-      fireEvent.click(dropzone)
-      drainTimers()
+      fireEvent.click(dropzone);
+      drainTimers();
 
-      expect(onClickSpy).toHaveBeenCalled()
-      jest.useRealTimers()
-      isIeOrEdgeSpy.mockClear()
-    })
-  })
+      expect(onClickSpy).toHaveBeenCalled();
+      jest.useRealTimers();
+      isIeOrEdgeSpy.mockClear();
+    });
+  });
 
-  describe('onKeyDown', () => {
-    it('triggers the click event on the input if the SPACE/ENTER keys are pressed', () => {
-      const activeRef = createRef()
-      const active = <span ref={activeRef}>I am active</span>
-      const onClickSpy = jest.spyOn(HTMLInputElement.prototype, 'click')
+  describe("onKeyDown", () => {
+    it("triggers the click event on the input if the SPACE/ENTER keys are pressed", () => {
+      const activeRef = createRef();
+      const active = <span ref={activeRef}>I am active</span>;
+      const onClickSpy = jest.spyOn(HTMLInputElement.prototype, "click");
       const { container } = render(
         <Dropzone>
           {({ getRootProps, getInputProps, isFileDialogActive }) => (
@@ -1319,26 +1348,26 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
+      );
 
-      const dropzone = container.querySelector('div')
-
-      fireEvent.keyDown(dropzone, {
-        keyCode: 32
-      })
+      const dropzone = container.querySelector("div");
 
       fireEvent.keyDown(dropzone, {
-        keyCode: 13
-      })
+        keyCode: 32,
+      });
 
-      const ref = activeRef.current
-      expect(ref).not.toBeNull()
-      expect(dropzone).toContainElement(ref)
-      expect(onClickSpy).toHaveBeenCalledTimes(2)
-    })
+      fireEvent.keyDown(dropzone, {
+        keyCode: 13,
+      });
 
-    it('does not trigger the click event on the input if the dropzone is not in focus', () => {
-      const onClickSpy = jest.spyOn(HTMLInputElement.prototype, 'click')
+      const ref = activeRef.current;
+      expect(ref).not.toBeNull();
+      expect(dropzone).toContainElement(ref);
+      expect(onClickSpy).toHaveBeenCalledTimes(2);
+    });
+
+    it("does not trigger the click event on the input if the dropzone is not in focus", () => {
+      const onClickSpy = jest.spyOn(HTMLInputElement.prototype, "click");
       const { container } = render(
         <Dropzone>
           {({ getRootProps, getInputProps }) => (
@@ -1347,39 +1376,43 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
+      );
 
-      const input = container.querySelector('input')
+      const input = container.querySelector("input");
 
       fireEvent.keyDown(input, {
-        keyCode: 32
-      })
+        keyCode: 32,
+      });
 
-      expect(onClickSpy).not.toHaveBeenCalled()
-    })
+      expect(onClickSpy).not.toHaveBeenCalled();
+    });
 
-    it('does not trigger the click event on the input if event propagation was stopped', () => {
-      const onClickSpy = jest.spyOn(HTMLInputElement.prototype, 'click')
+    it("does not trigger the click event on the input if event propagation was stopped", () => {
+      const onClickSpy = jest.spyOn(HTMLInputElement.prototype, "click");
       const { container } = render(
         <Dropzone>
           {({ getRootProps, getInputProps }) => (
-            <div {...getRootProps({ onKeyDown: event => event.stopPropagation() })}>
+            <div
+              {...getRootProps({
+                onKeyDown: (event) => event.stopPropagation(),
+              })}
+            >
               <input {...getInputProps()} />
             </div>
           )}
         </Dropzone>
-      )
+      );
 
-      const dropzone = container.querySelector('div')
+      const dropzone = container.querySelector("div");
 
       fireEvent.keyDown(dropzone, {
-        keyCode: 32
-      })
-      expect(onClickSpy).not.toHaveBeenCalled()
-    })
+        keyCode: 32,
+      });
+      expect(onClickSpy).not.toHaveBeenCalled();
+    });
 
-    it('does not trigger the click event on the input if {noKeyboard} is true', () => {
-      const onClickSpy = jest.spyOn(HTMLInputElement.prototype, 'click')
+    it("does not trigger the click event on the input if {noKeyboard} is true", () => {
+      const onClickSpy = jest.spyOn(HTMLInputElement.prototype, "click");
       const { container } = render(
         <Dropzone noKeyboard>
           {({ getRootProps, getInputProps }) => (
@@ -1388,18 +1421,18 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
+      );
 
-      const dropzone = container.querySelector('div')
+      const dropzone = container.querySelector("div");
 
       fireEvent.keyDown(dropzone, {
-        keyCode: 32
-      })
-      expect(onClickSpy).not.toHaveBeenCalled()
-    })
+        keyCode: 32,
+      });
+      expect(onClickSpy).not.toHaveBeenCalled();
+    });
 
-    it('restores the keydown behavior when {noKeyboard} is set back to false', () => {
-      const onClickSpy = jest.spyOn(HTMLInputElement.prototype, 'click')
+    it("restores the keydown behavior when {noKeyboard} is set back to false", () => {
+      const onClickSpy = jest.spyOn(HTMLInputElement.prototype, "click");
       const { container, rerender } = render(
         <Dropzone noKeyboard>
           {({ getRootProps, getInputProps }) => (
@@ -1408,14 +1441,14 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
+      );
 
-      const dropzone = container.querySelector('div')
+      const dropzone = container.querySelector("div");
 
       fireEvent.keyDown(dropzone, {
-        keyCode: 32
-      })
-      expect(onClickSpy).not.toHaveBeenCalled()
+        keyCode: 32,
+      });
+      expect(onClickSpy).not.toHaveBeenCalled();
 
       rerender(
         <Dropzone noKeyboard={false}>
@@ -1425,16 +1458,16 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
+      );
 
       fireEvent.keyDown(dropzone, {
-        keyCode: 32
-      })
-      expect(onClickSpy).toHaveBeenCalled()
-    })
+        keyCode: 32,
+      });
+      expect(onClickSpy).toHaveBeenCalled();
+    });
 
-    it('does not trigger the click event on the input for other keys', () => {
-      const onClickSpy = jest.spyOn(HTMLInputElement.prototype, 'click')
+    it("does not trigger the click event on the input for other keys", () => {
+      const onClickSpy = jest.spyOn(HTMLInputElement.prototype, "click");
       const { container } = render(
         <Dropzone>
           {({ getRootProps, getInputProps }) => (
@@ -1443,27 +1476,27 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
+      );
 
-      const dropzone = container.querySelector('div')
+      const dropzone = container.querySelector("div");
 
       fireEvent.keyDown(dropzone, {
-        keyCode: 97
-      })
-      expect(onClickSpy).not.toHaveBeenCalled()
-    })
-  })
+        keyCode: 97,
+      });
+      expect(onClickSpy).not.toHaveBeenCalled();
+    });
+  });
 
-  describe('onDrag*', () => {
-    it('invokes callbacks for the appropriate events', async () => {
-      const data = createDtWithFiles(files)
+  describe("onDrag*", () => {
+    it("invokes callbacks for the appropriate events", async () => {
+      const data = createDtWithFiles(files);
 
       const props = {
         onDragEnter: jest.fn(),
         onDragOver: jest.fn(),
         onDragLeave: jest.fn(),
-        onDrop: jest.fn()
-      }
+        onDrop: jest.fn(),
+      };
 
       const ui = (
         <Dropzone {...props}>
@@ -1473,27 +1506,27 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
-      const { container, rerender } = render(ui)
-      const dropzone = container.querySelector('div')
+      );
+      const { container, rerender } = render(ui);
+      const dropzone = container.querySelector("div");
 
-      fireDragEnter(dropzone, data)
-      await flushPromises(rerender, ui)
-      expect(props.onDragEnter).toHaveBeenCalled()
+      fireDragEnter(dropzone, data);
+      await flushPromises(rerender, ui);
+      expect(props.onDragEnter).toHaveBeenCalled();
 
-      fireDragOver(dropzone, data)
-      expect(props.onDragOver).toHaveBeenCalled()
+      fireDragOver(dropzone, data);
+      expect(props.onDragOver).toHaveBeenCalled();
 
-      fireDragLeave(dropzone, data)
-      expect(props.onDragLeave).toHaveBeenCalled()
+      fireDragLeave(dropzone, data);
+      expect(props.onDragLeave).toHaveBeenCalled();
 
-      fireDrop(dropzone, data)
-      await flushPromises(rerender, ui)
-      expect(props.onDrop).toHaveBeenCalled()
-    })
+      fireDrop(dropzone, data);
+      await flushPromises(rerender, ui);
+      expect(props.onDrop).toHaveBeenCalled();
+    });
 
-    it('invokes callbacks for the appropriate events even if it cannot access the data', async () => {
-      const emptyData = createDtWithFiles([])
+    it("invokes callbacks for the appropriate events even if it cannot access the data", async () => {
+      const emptyData = createDtWithFiles([]);
 
       const props = {
         onDragEnter: jest.fn(),
@@ -1501,8 +1534,8 @@ describe('useDropzone() hook', () => {
         onDragLeave: jest.fn(),
         onDrop: jest.fn(),
         onDropAccepted: jest.fn(),
-        onDropRejected: jest.fn()
-      }
+        onDropRejected: jest.fn(),
+      };
 
       const ui = (
         <Dropzone {...props}>
@@ -1512,35 +1545,38 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
-      const { container, rerender } = render(ui)
-      const dropzone = container.querySelector('div')
+      );
+      const { container, rerender } = render(ui);
+      const dropzone = container.querySelector("div");
 
-      fireDragEnter(dropzone, emptyData)
-      await flushPromises(rerender, ui)
-      expect(props.onDragEnter).toHaveBeenCalled()
+      fireDragEnter(dropzone, emptyData);
+      await flushPromises(rerender, ui);
+      expect(props.onDragEnter).toHaveBeenCalled();
 
-      fireDragOver(dropzone, emptyData)
-      expect(props.onDragOver).toHaveBeenCalled()
+      fireDragOver(dropzone, emptyData);
+      expect(props.onDragOver).toHaveBeenCalled();
 
-      fireDragLeave(dropzone, emptyData)
-      expect(props.onDragLeave).toHaveBeenCalled()
+      fireDragLeave(dropzone, emptyData);
+      expect(props.onDragLeave).toHaveBeenCalled();
 
-      const data = createDtWithFiles(files)
-      fireDrop(dropzone, data)
-      await flushPromises(rerender, ui)
-      expect(props.onDrop).toHaveBeenCalled()
-      expect(props.onDropAccepted).toHaveBeenCalledWith(files, expect.any(Object))
-      expect(props.onDropRejected).not.toHaveBeenCalled()
-    })
+      const data = createDtWithFiles(files);
+      fireDrop(dropzone, data);
+      await flushPromises(rerender, ui);
+      expect(props.onDrop).toHaveBeenCalled();
+      expect(props.onDropAccepted).toHaveBeenCalledWith(
+        files,
+        expect.any(Object)
+      );
+      expect(props.onDropRejected).not.toHaveBeenCalled();
+    });
 
-    it('does not invoke callbacks if no files are detected', async () => {
+    it("does not invoke callbacks if no files are detected", async () => {
       const data = {
         dataTransfer: {
           items: [],
-          types: ['text/html', 'text/plain']
-        }
-      }
+          types: ["text/html", "text/plain"],
+        },
+      };
 
       const props = {
         onDragEnter: jest.fn(),
@@ -1548,8 +1584,8 @@ describe('useDropzone() hook', () => {
         onDragLeave: jest.fn(),
         onDrop: jest.fn(),
         onDropAccepted: jest.fn(),
-        onDropRejected: jest.fn()
-      }
+        onDropRejected: jest.fn(),
+      };
 
       const ui = (
         <Dropzone {...props}>
@@ -1559,29 +1595,29 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
-      const { container, rerender } = render(ui)
-      const dropzone = container.querySelector('div')
+      );
+      const { container, rerender } = render(ui);
+      const dropzone = container.querySelector("div");
 
-      fireDragEnter(dropzone, data)
-      await flushPromises(rerender, ui)
-      expect(props.onDragEnter).not.toHaveBeenCalled()
+      fireDragEnter(dropzone, data);
+      await flushPromises(rerender, ui);
+      expect(props.onDragEnter).not.toHaveBeenCalled();
 
-      fireDragOver(dropzone, data)
-      expect(props.onDragOver).not.toHaveBeenCalled()
+      fireDragOver(dropzone, data);
+      expect(props.onDragOver).not.toHaveBeenCalled();
 
-      fireDragLeave(dropzone, data)
-      expect(props.onDragLeave).not.toHaveBeenCalled()
+      fireDragLeave(dropzone, data);
+      expect(props.onDragLeave).not.toHaveBeenCalled();
 
-      fireDrop(dropzone, data)
-      await flushPromises(rerender, ui)
-      expect(props.onDrop).not.toHaveBeenCalled()
-      expect(props.onDropAccepted).not.toHaveBeenCalled()
-      expect(props.onDropRejected).not.toHaveBeenCalled()
-    })
+      fireDrop(dropzone, data);
+      await flushPromises(rerender, ui);
+      expect(props.onDrop).not.toHaveBeenCalled();
+      expect(props.onDropAccepted).not.toHaveBeenCalled();
+      expect(props.onDropRejected).not.toHaveBeenCalled();
+    });
 
-    it('does not invoke callbacks if {noDrag} is true', async () => {
-      const data = createDtWithFiles(files)
+    it("does not invoke callbacks if {noDrag} is true", async () => {
+      const data = createDtWithFiles(files);
 
       const props = {
         onDragEnter: jest.fn(),
@@ -1589,8 +1625,8 @@ describe('useDropzone() hook', () => {
         onDragLeave: jest.fn(),
         onDrop: jest.fn(),
         onDropAccepted: jest.fn(),
-        onDropRejected: jest.fn()
-      }
+        onDropRejected: jest.fn(),
+      };
 
       const ui = (
         <Dropzone {...props} noDrag>
@@ -1600,36 +1636,36 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
-      const { container, rerender } = render(ui)
-      const dropzone = container.querySelector('div')
+      );
+      const { container, rerender } = render(ui);
+      const dropzone = container.querySelector("div");
 
-      fireDragEnter(dropzone, data)
-      await flushPromises(rerender, ui)
-      expect(props.onDragEnter).not.toHaveBeenCalled()
+      fireDragEnter(dropzone, data);
+      await flushPromises(rerender, ui);
+      expect(props.onDragEnter).not.toHaveBeenCalled();
 
-      fireDragOver(dropzone, data)
-      expect(props.onDragOver).not.toHaveBeenCalled()
+      fireDragOver(dropzone, data);
+      expect(props.onDragOver).not.toHaveBeenCalled();
 
-      fireDragLeave(dropzone, data)
-      expect(props.onDragLeave).not.toHaveBeenCalled()
+      fireDragLeave(dropzone, data);
+      expect(props.onDragLeave).not.toHaveBeenCalled();
 
-      fireDrop(dropzone, data)
-      await flushPromises(rerender, ui)
-      expect(props.onDrop).not.toHaveBeenCalled()
-      expect(props.onDropAccepted).not.toHaveBeenCalled()
-      expect(props.onDropRejected).not.toHaveBeenCalled()
-    })
+      fireDrop(dropzone, data);
+      await flushPromises(rerender, ui);
+      expect(props.onDrop).not.toHaveBeenCalled();
+      expect(props.onDropAccepted).not.toHaveBeenCalled();
+      expect(props.onDropRejected).not.toHaveBeenCalled();
+    });
 
-    it('restores drag behavior if {noDrag} is set back to false', async () => {
-      const data = createDtWithFiles(files)
+    it("restores drag behavior if {noDrag} is set back to false", async () => {
+      const data = createDtWithFiles(files);
 
       const props = {
         onDragEnter: jest.fn(),
         onDragOver: jest.fn(),
         onDragLeave: jest.fn(),
-        onDrop: jest.fn()
-      }
+        onDrop: jest.fn(),
+      };
 
       const noDragUi = (
         <Dropzone {...props} noDrag>
@@ -1639,23 +1675,23 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
-      const { container, rerender } = render(noDragUi)
-      const dropzone = container.querySelector('div')
+      );
+      const { container, rerender } = render(noDragUi);
+      const dropzone = container.querySelector("div");
 
-      fireDragEnter(dropzone, data)
-      await flushPromises(rerender, noDragUi)
-      expect(props.onDragEnter).not.toHaveBeenCalled()
+      fireDragEnter(dropzone, data);
+      await flushPromises(rerender, noDragUi);
+      expect(props.onDragEnter).not.toHaveBeenCalled();
 
-      fireDragOver(dropzone, data)
-      expect(props.onDragOver).not.toHaveBeenCalled()
+      fireDragOver(dropzone, data);
+      expect(props.onDragOver).not.toHaveBeenCalled();
 
-      fireDragLeave(dropzone, data)
-      expect(props.onDragLeave).not.toHaveBeenCalled()
+      fireDragLeave(dropzone, data);
+      expect(props.onDragLeave).not.toHaveBeenCalled();
 
-      fireDrop(dropzone, data)
-      await flushPromises(rerender, noDragUi)
-      expect(props.onDrop).not.toHaveBeenCalled()
+      fireDrop(dropzone, data);
+      await flushPromises(rerender, noDragUi);
+      expect(props.onDrop).not.toHaveBeenCalled();
 
       const ui = (
         <Dropzone {...props} noDrag={false}>
@@ -1665,247 +1701,293 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
-      rerender(ui)
+      );
+      rerender(ui);
 
-      fireDragEnter(dropzone, data)
-      await flushPromises(rerender, ui)
-      expect(props.onDragEnter).toHaveBeenCalled()
+      fireDragEnter(dropzone, data);
+      await flushPromises(rerender, ui);
+      expect(props.onDragEnter).toHaveBeenCalled();
 
-      fireDragOver(dropzone, data)
-      expect(props.onDragOver).toHaveBeenCalled()
+      fireDragOver(dropzone, data);
+      expect(props.onDragOver).toHaveBeenCalled();
 
-      fireDragLeave(dropzone, data)
-      expect(props.onDragLeave).toHaveBeenCalled()
+      fireDragLeave(dropzone, data);
+      expect(props.onDragLeave).toHaveBeenCalled();
 
-      fireDrop(dropzone, data)
-      await flushPromises(rerender, ui)
-      expect(props.onDrop).toHaveBeenCalled()
-    })
+      fireDrop(dropzone, data);
+      await flushPromises(rerender, ui);
+      expect(props.onDrop).toHaveBeenCalled();
+    });
 
-    it('sets {isDragActive} and {isDragAccept} if some files are accepted on dragenter', async () => {
+    it("sets {isDragActive} and {isDragAccept} if some files are accepted on dragenter", async () => {
       const ui = (
         <Dropzone>
-          {({ getRootProps, getInputProps, isDragActive, isDragAccept, isDragReject }) => (
+          {({
+            getRootProps,
+            getInputProps,
+            isDragActive,
+            isDragAccept,
+            isDragReject,
+          }) => (
             <div {...getRootProps()}>
               <input {...getInputProps()} />
-              {isDragActive && 'dragActive'}
-              {isDragAccept && 'dragAccept'}
-              {isDragReject && 'dragReject'}
+              {isDragActive && "dragActive"}
+              {isDragAccept && "dragAccept"}
+              {isDragReject && "dragReject"}
             </div>
           )}
         </Dropzone>
-      )
-      const { container, rerender } = render(ui)
-      const dropzone = container.querySelector('div')
+      );
+      const { container, rerender } = render(ui);
+      const dropzone = container.querySelector("div");
 
-      const data = createDtWithFiles(files)
-      fireDragEnter(dropzone, data)
-      await flushPromises(rerender, ui)
+      const data = createDtWithFiles(files);
+      fireDragEnter(dropzone, data);
+      await flushPromises(rerender, ui);
 
-      expect(dropzone).toHaveTextContent('dragActive')
-      expect(dropzone).toHaveTextContent('dragAccept')
-      expect(dropzone).not.toHaveTextContent('dragReject')
-    })
+      expect(dropzone).toHaveTextContent("dragActive");
+      expect(dropzone).toHaveTextContent("dragAccept");
+      expect(dropzone).not.toHaveTextContent("dragReject");
+    });
 
-    it('sets {isDragActive} and {isDragReject} of some files are not accepted on dragenter', async () => {
+    it("sets {isDragActive} and {isDragReject} of some files are not accepted on dragenter", async () => {
       const ui = (
         <Dropzone accept="image/*">
-          {({ getRootProps, getInputProps, isDragActive, isDragAccept, isDragReject }) => (
+          {({
+            getRootProps,
+            getInputProps,
+            isDragActive,
+            isDragAccept,
+            isDragReject,
+          }) => (
             <div {...getRootProps()}>
               <input {...getInputProps()} />
-              {isDragActive && 'dragActive'}
-              {isDragAccept && 'dragAccept'}
-              {isDragReject && 'dragReject'}
+              {isDragActive && "dragActive"}
+              {isDragAccept && "dragAccept"}
+              {isDragReject && "dragReject"}
             </div>
           )}
         </Dropzone>
-      )
-      const { container, rerender } = render(ui)
-      const dropzone = container.querySelector('div')
+      );
+      const { container, rerender } = render(ui);
+      const dropzone = container.querySelector("div");
 
-      const data = createDtWithFiles([...files, ...images])
-      fireDragEnter(dropzone, data)
-      await flushPromises(rerender, ui)
+      const data = createDtWithFiles([...files, ...images]);
+      fireDragEnter(dropzone, data);
+      await flushPromises(rerender, ui);
 
-      expect(dropzone).toHaveTextContent('dragActive')
-      expect(dropzone).not.toHaveTextContent('dragAccept')
-      expect(dropzone).toHaveTextContent('dragReject')
-    })
+      expect(dropzone).toHaveTextContent("dragActive");
+      expect(dropzone).not.toHaveTextContent("dragAccept");
+      expect(dropzone).toHaveTextContent("dragReject");
+    });
 
-    it('sets {isDragReject} if some files are too large', async () => {
+    it("sets {isDragReject} if some files are too large", async () => {
       const ui = (
         <Dropzone maxSize={0}>
           {({ getRootProps, getInputProps, isDragAccept, isDragReject }) => (
             <div {...getRootProps()}>
               <input {...getInputProps()} />
-              {isDragAccept && 'dragAccept'}
-              {isDragReject && 'dragReject'}
+              {isDragAccept && "dragAccept"}
+              {isDragReject && "dragReject"}
             </div>
           )}
         </Dropzone>
-      )
-      const { container, rerender } = render(ui)
-      const dropzone = container.querySelector('div')
+      );
+      const { container, rerender } = render(ui);
+      const dropzone = container.querySelector("div");
 
-      const data = createDtWithFiles(files)
-      fireDragEnter(dropzone, data)
-      await flushPromises(rerender, ui)
+      const data = createDtWithFiles(files);
+      fireDragEnter(dropzone, data);
+      await flushPromises(rerender, ui);
 
-      expect(dropzone).not.toHaveTextContent('dragAccept')
-      expect(dropzone).toHaveTextContent('dragReject')
-    })
+      expect(dropzone).not.toHaveTextContent("dragAccept");
+      expect(dropzone).toHaveTextContent("dragReject");
+    });
 
-    it('sets {isDragActive, isDragAccept, isDragReject} if any files are rejected and {multiple} is false on dragenter', async () => {
+    it("sets {isDragActive, isDragAccept, isDragReject} if any files are rejected and {multiple} is false on dragenter", async () => {
       const ui = (
         <Dropzone accept="image/*" multiple={false}>
-          {({ getRootProps, getInputProps, isDragActive, isDragAccept, isDragReject }) => (
+          {({
+            getRootProps,
+            getInputProps,
+            isDragActive,
+            isDragAccept,
+            isDragReject,
+          }) => (
             <div {...getRootProps()}>
               <input {...getInputProps()} />
-              {isDragActive && 'dragActive'}
-              {isDragAccept && 'dragAccept'}
-              {isDragReject && 'dragReject'}
+              {isDragActive && "dragActive"}
+              {isDragAccept && "dragAccept"}
+              {isDragReject && "dragReject"}
             </div>
           )}
         </Dropzone>
-      )
-      const { container, rerender } = render(ui)
-      const dropzone = container.querySelector('div')
+      );
+      const { container, rerender } = render(ui);
+      const dropzone = container.querySelector("div");
 
-      const data = createDtWithFiles(images)
-      fireDragEnter(dropzone, data)
-      await flushPromises(rerender, ui)
+      const data = createDtWithFiles(images);
+      fireDragEnter(dropzone, data);
+      await flushPromises(rerender, ui);
 
-      expect(dropzone).toHaveTextContent('dragActive')
-      expect(dropzone).not.toHaveTextContent('dragAccept')
-      expect(dropzone).toHaveTextContent('dragReject')
-    })
+      expect(dropzone).toHaveTextContent("dragActive");
+      expect(dropzone).not.toHaveTextContent("dragAccept");
+      expect(dropzone).toHaveTextContent("dragReject");
+    });
 
-    it('keeps {isDragActive} if dragleave is triggered for some arbitrary node', async () => {
-      const { container: overlayContainer } = render(<div />)
+    it("keeps {isDragActive} if dragleave is triggered for some arbitrary node", async () => {
+      const { container: overlayContainer } = render(<div />);
       const ui = (
         <Dropzone>
-          {({ getRootProps, getInputProps, isDragActive, isDragAccept, isDragReject }) => (
+          {({
+            getRootProps,
+            getInputProps,
+            isDragActive,
+            isDragAccept,
+            isDragReject,
+          }) => (
             <div {...getRootProps()}>
               <input {...getInputProps()} />
-              {isDragActive && 'dragActive'}
-              {isDragAccept && 'dragAccept'}
-              {isDragReject && 'dragReject'}
+              {isDragActive && "dragActive"}
+              {isDragAccept && "dragAccept"}
+              {isDragReject && "dragReject"}
             </div>
           )}
         </Dropzone>
-      )
-      const { container, rerender } = render(ui)
-      const dropzone = container.querySelector('div')
+      );
+      const { container, rerender } = render(ui);
+      const dropzone = container.querySelector("div");
 
-      const data = createDtWithFiles(files)
-      fireDragEnter(dropzone, data)
-      await flushPromises(rerender, ui)
+      const data = createDtWithFiles(files);
+      fireDragEnter(dropzone, data);
+      await flushPromises(rerender, ui);
 
-      const event = new Event('dragleave', { bubbles: true })
-      Object.defineProperty(event, 'target', {
-        value: overlayContainer.querySelector('div'),
-        writable: false
-      })
-      fireEvent(dropzone, event)
+      const event = new Event("dragleave", { bubbles: true });
+      Object.defineProperty(event, "target", {
+        value: overlayContainer.querySelector("div"),
+        writable: false,
+      });
+      fireEvent(dropzone, event);
 
-      expect(dropzone).toHaveTextContent('dragActive')
-    })
+      expect(dropzone).toHaveTextContent("dragActive");
+    });
 
-    it('updates {isDragActive} if {accept} changes mid-drag', async () => {
+    it("updates {isDragActive} if {accept} changes mid-drag", async () => {
       const ui = (
         <Dropzone accept="image/*">
-          {({ getRootProps, getInputProps, isDragActive, isDragAccept, isDragReject }) => (
+          {({
+            getRootProps,
+            getInputProps,
+            isDragActive,
+            isDragAccept,
+            isDragReject,
+          }) => (
             <div {...getRootProps()}>
               <input {...getInputProps()} />
-              {isDragActive && 'dragActive'}
-              {isDragAccept && 'dragAccept'}
-              {isDragReject && 'dragReject'}
+              {isDragActive && "dragActive"}
+              {isDragAccept && "dragAccept"}
+              {isDragReject && "dragReject"}
             </div>
           )}
         </Dropzone>
-      )
-      const { container, rerender } = render(ui)
-      const dropzone = container.querySelector('div')
+      );
+      const { container, rerender } = render(ui);
+      const dropzone = container.querySelector("div");
 
-      const data = createDtWithFiles(images)
-      fireDragEnter(dropzone, data)
-      await flushPromises(rerender, ui)
+      const data = createDtWithFiles(images);
+      fireDragEnter(dropzone, data);
+      await flushPromises(rerender, ui);
 
-      expect(dropzone).toHaveTextContent('dragActive')
-      expect(dropzone).toHaveTextContent('dragAccept')
-      expect(dropzone).not.toHaveTextContent('dragReject')
+      expect(dropzone).toHaveTextContent("dragActive");
+      expect(dropzone).toHaveTextContent("dragAccept");
+      expect(dropzone).not.toHaveTextContent("dragReject");
 
       rerender(
         <Dropzone accept="text/*">
-          {({ getRootProps, getInputProps, isDragActive, isDragAccept, isDragReject }) => (
+          {({
+            getRootProps,
+            getInputProps,
+            isDragActive,
+            isDragAccept,
+            isDragReject,
+          }) => (
             <div {...getRootProps()}>
               <input {...getInputProps()} />
-              {isDragActive && 'dragActive'}
-              {isDragAccept && 'dragAccept'}
-              {isDragReject && 'dragReject'}
+              {isDragActive && "dragActive"}
+              {isDragAccept && "dragAccept"}
+              {isDragReject && "dragReject"}
             </div>
           )}
         </Dropzone>
-      )
+      );
 
-      expect(dropzone).toHaveTextContent('dragActive')
-      expect(dropzone).not.toHaveTextContent('dragAccept')
-      expect(dropzone).toHaveTextContent('dragReject')
-    })
+      expect(dropzone).toHaveTextContent("dragActive");
+      expect(dropzone).not.toHaveTextContent("dragAccept");
+      expect(dropzone).toHaveTextContent("dragReject");
+    });
 
-    it('resets {isDragActive, isDragAccept, isDragReject} on dragleave', async () => {
+    it("resets {isDragActive, isDragAccept, isDragReject} on dragleave", async () => {
       const ui = (
         <Dropzone accept="image/*">
-          {({ getRootProps, getInputProps, isDragActive, isDragAccept, isDragReject }) => (
+          {({
+            getRootProps,
+            getInputProps,
+            isDragActive,
+            isDragAccept,
+            isDragReject,
+          }) => (
             <div {...getRootProps()}>
               <input {...getInputProps()} />
-              {isDragActive && 'dragActive'}
-              {isDragAccept && 'dragAccept'}
-              {isDragReject && 'dragReject'}
+              {isDragActive && "dragActive"}
+              {isDragAccept && "dragAccept"}
+              {isDragReject && "dragReject"}
               {!isDragActive && (
-                <span id="child" data-accept={isDragAccept} data-reject={isDragReject} />
+                <span
+                  id="child"
+                  data-accept={isDragAccept}
+                  data-reject={isDragReject}
+                />
               )}
             </div>
           )}
         </Dropzone>
-      )
-      const { container, rerender } = render(ui)
-      const dropzone = container.querySelector('div')
+      );
+      const { container, rerender } = render(ui);
+      const dropzone = container.querySelector("div");
 
-      const data = createDtWithFiles(images)
+      const data = createDtWithFiles(images);
 
-      fireDragEnter(container.querySelector('#child'), data)
-      fireDragEnter(dropzone, data)
-      await flushPromises(rerender, ui)
-      fireDragEnter(dropzone, data)
-      await flushPromises(rerender, ui)
+      fireDragEnter(container.querySelector("#child"), data);
+      fireDragEnter(dropzone, data);
+      await flushPromises(rerender, ui);
+      fireDragEnter(dropzone, data);
+      await flushPromises(rerender, ui);
 
-      expect(dropzone).toHaveTextContent('dragActive')
-      expect(dropzone).toHaveTextContent('dragAccept')
-      expect(dropzone).not.toHaveTextContent('dragReject')
+      expect(dropzone).toHaveTextContent("dragActive");
+      expect(dropzone).toHaveTextContent("dragAccept");
+      expect(dropzone).not.toHaveTextContent("dragReject");
 
-      fireDragLeave(dropzone, data)
-      await flushPromises(rerender, ui)
-      expect(dropzone).toHaveTextContent('dragActive')
-      expect(dropzone).toHaveTextContent('dragAccept')
-      expect(dropzone).not.toHaveTextContent('dragReject')
+      fireDragLeave(dropzone, data);
+      await flushPromises(rerender, ui);
+      expect(dropzone).toHaveTextContent("dragActive");
+      expect(dropzone).toHaveTextContent("dragAccept");
+      expect(dropzone).not.toHaveTextContent("dragReject");
 
-      fireDragLeave(dropzone, data)
-      await flushPromises(rerender, ui)
-      expect(dropzone).not.toHaveTextContent('dragActive')
-      expect(dropzone).not.toHaveTextContent('dragAccept')
-      expect(dropzone).not.toHaveTextContent('dragReject')
+      fireDragLeave(dropzone, data);
+      await flushPromises(rerender, ui);
+      expect(dropzone).not.toHaveTextContent("dragActive");
+      expect(dropzone).not.toHaveTextContent("dragAccept");
+      expect(dropzone).not.toHaveTextContent("dragReject");
 
-      const child = container.querySelector('#child')
-      expect(child).toHaveAttribute('data-accept', 'false')
-      expect(child).toHaveAttribute('data-reject', 'false')
-    })
-  })
+      const child = container.querySelector("#child");
+      expect(child).toHaveAttribute("data-accept", "false");
+      expect(child).toHaveAttribute("data-reject", "false");
+    });
+  });
 
-  describe('onDrop', () => {
-    test('callback is invoked when <input> change event occurs', async () => {
-      const onDropSpy = jest.fn()
+  describe("onDrop", () => {
+    test("callback is invoked when <input> change event occurs", async () => {
+      const onDropSpy = jest.fn();
 
       const ui = (
         <Dropzone onDrop={onDropSpy}>
@@ -1915,28 +1997,28 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
-      const { container, rerender } = render(ui)
-      const input = container.querySelector('input')
+      );
+      const { container, rerender } = render(ui);
+      const input = container.querySelector("input");
 
-      Object.defineProperty(input, 'files', { value: files })
+      Object.defineProperty(input, "files", { value: files });
 
-      dispatchEvt(input, 'change')
-      await flushPromises(rerender, ui)
+      dispatchEvt(input, "change");
+      await flushPromises(rerender, ui);
 
-      expect(onDropSpy).toHaveBeenCalledWith(files, [], expect.anything())
-    })
+      expect(onDropSpy).toHaveBeenCalledWith(files, [], expect.anything());
+    });
 
-    it('sets {acceptedFiles, fileRejections}', async () => {
+    it("sets {acceptedFiles, fileRejections}", async () => {
       const FileList = ({ files = [] }) => (
         <ul>
-          {files.map(file => (
-            <li key={file.name} data-type={'accepted'}>
+          {files.map((file) => (
+            <li key={file.name} data-type={"accepted"}>
               {file.name}
             </li>
           ))}
         </ul>
-      )
+      );
 
       const RejectedFileList = ({ fileRejections = [] }) => (
         <ul>
@@ -1944,7 +2026,7 @@ describe('useDropzone() hook', () => {
             <li key={file.name}>
               <span data-type={"rejected"}>{file.name}</span>
               <ul>
-                {errors.map(e => (
+                {errors.map((e) => (
                   <li key={e.code} data-type={"error"}>
                     {e.code}
                   </li>
@@ -1953,15 +2035,20 @@ describe('useDropzone() hook', () => {
             </li>
           ))}
         </ul>
-      )
+      );
 
-      const getAcceptedFiles = node => node.querySelectorAll(`[data-type="accepted"]`)
-      const getRejectedFiles = node => node.querySelectorAll(`[data-type="rejected"]`)
-      const getRejectedFilesErrors = node => node.querySelectorAll(`[data-type="error"]`)
+      const getAcceptedFiles = (node) =>
+        node.querySelectorAll(`[data-type="accepted"]`);
+      const getRejectedFiles = (node) =>
+        node.querySelectorAll(`[data-type="rejected"]`);
+      const getRejectedFilesErrors = (node) =>
+        node.querySelectorAll(`[data-type="error"]`);
       const matchToFiles = (fileList, files) =>
-        Array.from(fileList).every(item => !!files.find(file => file.name === item.textContent))
+        Array.from(fileList).every(
+          (item) => !!files.find((file) => file.name === item.textContent)
+        );
       const matchToErrorCode = (errorList, code) =>
-        Array.from(errorList).every(item => item.textContent === code)
+        Array.from(errorList).every((item) => item.textContent === code);
 
       const ui = (
         <Dropzone accept="image/*">
@@ -1973,60 +2060,68 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
-      const { container, rerender } = render(ui)
-      const dropzone = container.querySelector('div')
+      );
+      const { container, rerender } = render(ui);
+      const dropzone = container.querySelector("div");
 
-      fireDrop(dropzone, createDtWithFiles(images))
-      await flushPromises(rerender, ui)
-      const acceptedFileList = getAcceptedFiles(dropzone)
-      expect(acceptedFileList).toHaveLength(images.length)
-      expect(matchToFiles(acceptedFileList, images)).toBe(true)
+      fireDrop(dropzone, createDtWithFiles(images));
+      await flushPromises(rerender, ui);
+      const acceptedFileList = getAcceptedFiles(dropzone);
+      expect(acceptedFileList).toHaveLength(images.length);
+      expect(matchToFiles(acceptedFileList, images)).toBe(true);
 
-      fireDrop(dropzone, createDtWithFiles(files))
-      await flushPromises(rerender, ui)
-      const rejectedFileList = getRejectedFiles(dropzone)
-      expect(rejectedFileList).toHaveLength(files.length)
-      expect(matchToFiles(rejectedFileList, files)).toBe(true)
-      const rejectedFileErrorList = getRejectedFilesErrors(dropzone)
-      expect(rejectedFileErrorList).toHaveLength(files.length)
-      expect(matchToErrorCode(rejectedFileErrorList, 'file-invalid-type')).toBe(true)
-    })
+      fireDrop(dropzone, createDtWithFiles(files));
+      await flushPromises(rerender, ui);
+      const rejectedFileList = getRejectedFiles(dropzone);
+      expect(rejectedFileList).toHaveLength(files.length);
+      expect(matchToFiles(rejectedFileList, files)).toBe(true);
+      const rejectedFileErrorList = getRejectedFilesErrors(dropzone);
+      expect(rejectedFileErrorList).toHaveLength(files.length);
+      expect(matchToErrorCode(rejectedFileErrorList, "file-invalid-type")).toBe(
+        true
+      );
+    });
 
-    it('resets {isDragActive, isDragAccept, isDragReject}', async () => {
+    it("resets {isDragActive, isDragAccept, isDragReject}", async () => {
       const ui = (
         <Dropzone>
-          {({ getRootProps, getInputProps, isDragActive, isDragAccept, isDragReject }) => (
+          {({
+            getRootProps,
+            getInputProps,
+            isDragActive,
+            isDragAccept,
+            isDragReject,
+          }) => (
             <div {...getRootProps()}>
               <input {...getInputProps()} />
-              {isDragActive && 'dragActive'}
-              {isDragAccept && 'dragAccept'}
-              {isDragReject && 'dragReject'}
+              {isDragActive && "dragActive"}
+              {isDragAccept && "dragAccept"}
+              {isDragReject && "dragReject"}
             </div>
           )}
         </Dropzone>
-      )
-      const { container, rerender } = render(ui)
-      const dropzone = container.querySelector('div')
+      );
+      const { container, rerender } = render(ui);
+      const dropzone = container.querySelector("div");
 
-      const data = createDtWithFiles(files)
+      const data = createDtWithFiles(files);
 
-      fireDragEnter(dropzone, data)
-      await flushPromises(rerender, ui)
+      fireDragEnter(dropzone, data);
+      await flushPromises(rerender, ui);
 
-      expect(dropzone).toHaveTextContent('dragActive')
-      expect(dropzone).toHaveTextContent('dragAccept')
-      expect(dropzone).not.toHaveTextContent('dragReject')
+      expect(dropzone).toHaveTextContent("dragActive");
+      expect(dropzone).toHaveTextContent("dragAccept");
+      expect(dropzone).not.toHaveTextContent("dragReject");
 
-      fireDrop(dropzone, data)
-      await flushPromises(rerender, ui)
-      expect(dropzone).not.toHaveTextContent('dragActive')
-      expect(dropzone).not.toHaveTextContent('dragAccept')
-      expect(dropzone).not.toHaveTextContent('dragReject')
-    })
+      fireDrop(dropzone, data);
+      await flushPromises(rerender, ui);
+      expect(dropzone).not.toHaveTextContent("dragActive");
+      expect(dropzone).not.toHaveTextContent("dragAccept");
+      expect(dropzone).not.toHaveTextContent("dragReject");
+    });
 
-    it('rejects all files if {multiple} is false and {accept} criteria is not met', async () => {
-      const onDropSpy = jest.fn()
+    it("rejects all files if {multiple} is false and {accept} criteria is not met", async () => {
+      const onDropSpy = jest.fn();
       const ui = (
         <Dropzone accept="image/*" onDrop={onDropSpy} multiple={false}>
           {({ getRootProps, getInputProps }) => (
@@ -2035,27 +2130,31 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
-      const { container, rerender } = render(ui)
-      const dropzone = container.querySelector('div')
+      );
+      const { container, rerender } = render(ui);
+      const dropzone = container.querySelector("div");
 
-      fireDrop(dropzone, createDtWithFiles(files))
-      await flushPromises(rerender, ui)
-      expect(onDropSpy).toHaveBeenCalledWith([], [
-        {
-          file: files[0],
-          errors: [
-            {
-              code: 'file-invalid-type',
-              message: 'File type must be image/*',
-            }
-          ]
-        }
-      ], expect.anything())
-    })
+      fireDrop(dropzone, createDtWithFiles(files));
+      await flushPromises(rerender, ui);
+      expect(onDropSpy).toHaveBeenCalledWith(
+        [],
+        [
+          {
+            file: files[0],
+            errors: [
+              {
+                code: "file-invalid-type",
+                message: "File type must be image/*",
+              },
+            ],
+          },
+        ],
+        expect.anything()
+      );
+    });
 
-    it('rejects all files if {multiple} is false and {accept} criteria is met', async () => {
-      const onDropSpy = jest.fn()
+    it("rejects all files if {multiple} is false and {accept} criteria is met", async () => {
+      const onDropSpy = jest.fn();
       const ui = (
         <Dropzone accept="image/*" onDrop={onDropSpy} multiple={false}>
           {({ getRootProps, getInputProps }) => (
@@ -2064,132 +2163,162 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
-      const { container, rerender } = render(ui)
-      const dropzone = container.querySelector('div')
+      );
+      const { container, rerender } = render(ui);
+      const dropzone = container.querySelector("div");
 
-      fireDrop(dropzone, createDtWithFiles(images))
-      await flushPromises(rerender, ui)
-      expect(onDropSpy).toHaveBeenCalledWith([], [
-        {
-          file: images[0],
-          errors: [
-            {
-              code: 'too-many-files',
-              message: 'Too many files',
-            }
-          ]
-        },
-        {
-          file: images[1],
-          errors: [
-            {
-              code: 'too-many-files',
-              message: 'Too many files',
-            }
-          ]
-        }
-      ], expect.anything())
-    })
+      fireDrop(dropzone, createDtWithFiles(images));
+      await flushPromises(rerender, ui);
+      expect(onDropSpy).toHaveBeenCalledWith(
+        [],
+        [
+          {
+            file: images[0],
+            errors: [
+              {
+                code: "too-many-files",
+                message: "Too many files",
+              },
+            ],
+          },
+          {
+            file: images[1],
+            errors: [
+              {
+                code: "too-many-files",
+                message: "Too many files",
+              },
+            ],
+          },
+        ],
+        expect.anything()
+      );
+    });
 
-    it('rejects all files if {multiple} is true and maxFiles is less than files and {accept} criteria is met', async () => {
-      const onDropSpy = jest.fn()
-      const onDropRejectedSpy = jest.fn()
+    it("rejects all files if {multiple} is true and maxFiles is less than files and {accept} criteria is met", async () => {
+      const onDropSpy = jest.fn();
+      const onDropRejectedSpy = jest.fn();
       const ui = (
-        <Dropzone accept="image/*" onDrop={onDropSpy} onDropRejected={onDropRejectedSpy} multiple={true} maxFiles={1}>
+        <Dropzone
+          accept="image/*"
+          onDrop={onDropSpy}
+          onDropRejected={onDropRejectedSpy}
+          multiple={true}
+          maxFiles={1}
+        >
           {({ getRootProps, getInputProps, isDragReject, isDragAccept }) => (
             <div {...getRootProps()}>
               <input {...getInputProps()} />
-               {isDragReject && 'dragReject'}
-               {isDragAccept && 'dragAccept'}
+              {isDragReject && "dragReject"}
+              {isDragAccept && "dragAccept"}
             </div>
           )}
         </Dropzone>
-      )
-      const { container, rerender } = render(ui)
-      const dropzone = container.querySelector('div')
-      fireDrop(dropzone, createDtWithFiles(images))
-      await flushPromises(rerender, ui)
-      expect(onDropRejectedSpy).toHaveBeenCalled()
-      fireDragEnter(dropzone, createDtWithFiles(images))
-      await flushPromises(rerender, ui)
-      expect(dropzone).toHaveTextContent('dragReject')
-      expect(dropzone).not.toHaveTextContent('dragAccept')
-      expect(onDropSpy).toHaveBeenCalledWith([], [
-        {
-          file: images[0],
-          errors: [
-            {
-              code: 'too-many-files',
-              message: 'Too many files',
-            }
-          ]
-        },
-        {
-          file: images[1],
-          errors: [
-            {
-              code: 'too-many-files',
-              message: 'Too many files',
-            }
-          ]
-        }
-      ], expect.anything())
-    })
+      );
+      const { container, rerender } = render(ui);
+      const dropzone = container.querySelector("div");
+      fireDrop(dropzone, createDtWithFiles(images));
+      await flushPromises(rerender, ui);
+      expect(onDropRejectedSpy).toHaveBeenCalled();
+      fireDragEnter(dropzone, createDtWithFiles(images));
+      await flushPromises(rerender, ui);
+      expect(dropzone).toHaveTextContent("dragReject");
+      expect(dropzone).not.toHaveTextContent("dragAccept");
+      expect(onDropSpy).toHaveBeenCalledWith(
+        [],
+        [
+          {
+            file: images[0],
+            errors: [
+              {
+                code: "too-many-files",
+                message: "Too many files",
+              },
+            ],
+          },
+          {
+            file: images[1],
+            errors: [
+              {
+                code: "too-many-files",
+                message: "Too many files",
+              },
+            ],
+          },
+        ],
+        expect.anything()
+      );
+    });
 
-    it('rejects all files if {multiple} is true and maxFiles has been updated so that it is less than files', async () => {
-      const onDropSpy = jest.fn()
-      const onDropRejectedSpy = jest.fn()
+    it("rejects all files if {multiple} is true and maxFiles has been updated so that it is less than files", async () => {
+      const onDropSpy = jest.fn();
+      const onDropRejectedSpy = jest.fn();
       const ui = (maxFiles) => (
-        <Dropzone accept="image/*" onDrop={onDropSpy} multiple={true} maxFiles={maxFiles} onDropRejected={onDropRejectedSpy}>
+        <Dropzone
+          accept="image/*"
+          onDrop={onDropSpy}
+          multiple={true}
+          maxFiles={maxFiles}
+          onDropRejected={onDropRejectedSpy}
+        >
           {({ getRootProps, getInputProps }) => (
             <div {...getRootProps()}>
               <input {...getInputProps()} />
             </div>
           )}
         </Dropzone>
-      )
-      const { container, rerender } = render(ui(3))
-      const dropzone = container.querySelector('div')
+      );
+      const { container, rerender } = render(ui(3));
+      const dropzone = container.querySelector("div");
 
-      fireDrop(dropzone, createDtWithFiles(images))
-      await flushPromises(rerender, ui(3))
-      expect(onDropRejectedSpy).not.toHaveBeenCalled()
-      expect(onDropSpy).toHaveBeenCalledWith(images, [], expect.anything())
+      fireDrop(dropzone, createDtWithFiles(images));
+      await flushPromises(rerender, ui(3));
+      expect(onDropRejectedSpy).not.toHaveBeenCalled();
+      expect(onDropSpy).toHaveBeenCalledWith(images, [], expect.anything());
 
       rerender(ui(1));
 
-      fireDrop(dropzone, createDtWithFiles(images))
-      await flushPromises(rerender, ui(1))
+      fireDrop(dropzone, createDtWithFiles(images));
+      await flushPromises(rerender, ui(1));
       expect(onDropRejectedSpy).toHaveBeenCalledWith(
-        expect.arrayContaining(images.map((image) => expect.objectContaining({ errors: expect.any(Array), file: image }))),
+        expect.arrayContaining(
+          images.map((image) =>
+            expect.objectContaining({ errors: expect.any(Array), file: image })
+          )
+        ),
         expect.anything()
-      )
-    })
+      );
+    });
 
-    it('accepts multiple files if {multiple} is true and {accept} criteria is met', async () => {
-      const onDropSpy = jest.fn()
-      const onDropRejectedSpy = jest.fn()
+    it("accepts multiple files if {multiple} is true and {accept} criteria is met", async () => {
+      const onDropSpy = jest.fn();
+      const onDropRejectedSpy = jest.fn();
       const ui = (
-        <Dropzone accept="image/*" onDrop={onDropSpy} multiple={true} maxFiles={3} onDropRejected={onDropRejectedSpy}>
+        <Dropzone
+          accept="image/*"
+          onDrop={onDropSpy}
+          multiple={true}
+          maxFiles={3}
+          onDropRejected={onDropRejectedSpy}
+        >
           {({ getRootProps, getInputProps }) => (
             <div {...getRootProps()}>
               <input {...getInputProps()} />
             </div>
           )}
         </Dropzone>
-      )
-      const { container, rerender } = render(ui)
-      const dropzone = container.querySelector('div')
+      );
+      const { container, rerender } = render(ui);
+      const dropzone = container.querySelector("div");
 
-      fireDrop(dropzone, createDtWithFiles(images))
-      await flushPromises(rerender, ui)
-      expect(onDropRejectedSpy).not.toHaveBeenCalled()
-      expect(onDropSpy).toHaveBeenCalledWith(images, [], expect.anything())
-    })
+      fireDrop(dropzone, createDtWithFiles(images));
+      await flushPromises(rerender, ui);
+      expect(onDropRejectedSpy).not.toHaveBeenCalled();
+      expect(onDropSpy).toHaveBeenCalledWith(images, [], expect.anything());
+    });
 
-    it('accepts a single files if {multiple} is false and {accept} criteria is met', async () => {
-      const onDropSpy = jest.fn()
+    it("accepts a single files if {multiple} is false and {accept} criteria is met", async () => {
+      const onDropSpy = jest.fn();
       const ui = (
         <Dropzone accept="image/*" onDrop={onDropSpy} multiple={false}>
           {({ getRootProps, getInputProps }) => (
@@ -2198,18 +2327,18 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
-      const { container, rerender } = render(ui)
-      const dropzone = container.querySelector('div')
+      );
+      const { container, rerender } = render(ui);
+      const dropzone = container.querySelector("div");
 
-      const [image] = images
-      fireDrop(dropzone, createDtWithFiles([image]))
-      await flushPromises(rerender, ui)
-      expect(onDropSpy).toHaveBeenCalledWith([image], [], expect.anything())
-    })
+      const [image] = images;
+      fireDrop(dropzone, createDtWithFiles([image]));
+      await flushPromises(rerender, ui);
+      expect(onDropSpy).toHaveBeenCalledWith([image], [], expect.anything());
+    });
 
-    it('accepts all files if {multiple} is true', async () => {
-      const onDropSpy = jest.fn()
+    it("accepts all files if {multiple} is true", async () => {
+      const onDropSpy = jest.fn();
       const ui = (
         <Dropzone onDrop={onDropSpy}>
           {({ getRootProps, getInputProps }) => (
@@ -2218,19 +2347,19 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
-      const { container, rerender } = render(ui)
-      const dropzone = container.querySelector('div')
+      );
+      const { container, rerender } = render(ui);
+      const dropzone = container.querySelector("div");
 
-      fireDrop(dropzone, createDtWithFiles(files))
-      await flushPromises(rerender, ui)
-      expect(onDropSpy).toHaveBeenCalledWith(files, [], expect.anything())
-    })
+      fireDrop(dropzone, createDtWithFiles(files));
+      await flushPromises(rerender, ui);
+      expect(onDropSpy).toHaveBeenCalledWith(files, [], expect.anything());
+    });
 
-    it('resets {isFileDialogActive} state', async () => {
-      const onDropSpy = jest.fn()
-      const activeRef = createRef()
-      const active = <span ref={activeRef}>I am active</span>
+    it("resets {isFileDialogActive} state", async () => {
+      const onDropSpy = jest.fn();
+      const activeRef = createRef();
+      const active = <span ref={activeRef}>I am active</span>;
 
       const ui = (
         <Dropzone onDrop={onDropSpy}>
@@ -2244,24 +2373,24 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
-      const { container, rerender } = render(ui)
-      const dropzone = container.querySelector('div')
-      const btn = container.querySelector('button')
+      );
+      const { container, rerender } = render(ui);
+      const dropzone = container.querySelector("div");
+      const btn = container.querySelector("button");
 
-      btn.click()
+      btn.click();
 
-      const ref = activeRef.current
-      expect(dropzone).toContainElement(ref)
+      const ref = activeRef.current;
+      expect(dropzone).toContainElement(ref);
 
-      fireDrop(dropzone, createDtWithFiles(files))
-      await flushPromises(rerender, ui)
+      fireDrop(dropzone, createDtWithFiles(files));
+      await flushPromises(rerender, ui);
 
-      expect(dropzone).not.toContainElement(ref)
-    })
+      expect(dropzone).not.toContainElement(ref);
+    });
 
-    it('gets invoked with both accepted/rejected files', async () => {
-      const onDropSpy = jest.fn()
+    it("gets invoked with both accepted/rejected files", async () => {
+      const onDropSpy = jest.fn();
       const ui = (
         <Dropzone accept="image/*" onDrop={onDropSpy}>
           {({ getRootProps, getInputProps }) => (
@@ -2270,47 +2399,55 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
-      const { container, rerender } = render(ui)
-      const dropzone = container.querySelector('div')
+      );
+      const { container, rerender } = render(ui);
+      const dropzone = container.querySelector("div");
 
-      fireDrop(dropzone, createDtWithFiles(files))
-      await flushPromises(rerender, ui)
-      expect(onDropSpy).toHaveBeenCalledWith([], [
-        {
-          file: files[0],
-          errors: [
-            {
-              code: 'file-invalid-type',
-              message: 'File type must be image/*',
-            }
-          ]
-        }
-      ], expect.anything())
-      onDropSpy.mockClear()
+      fireDrop(dropzone, createDtWithFiles(files));
+      await flushPromises(rerender, ui);
+      expect(onDropSpy).toHaveBeenCalledWith(
+        [],
+        [
+          {
+            file: files[0],
+            errors: [
+              {
+                code: "file-invalid-type",
+                message: "File type must be image/*",
+              },
+            ],
+          },
+        ],
+        expect.anything()
+      );
+      onDropSpy.mockClear();
 
-      fireDrop(dropzone, createDtWithFiles(images))
-      await flushPromises(rerender, ui)
-      expect(onDropSpy).toHaveBeenCalledWith(images, [], expect.anything())
-      onDropSpy.mockClear()
+      fireDrop(dropzone, createDtWithFiles(images));
+      await flushPromises(rerender, ui);
+      expect(onDropSpy).toHaveBeenCalledWith(images, [], expect.anything());
+      onDropSpy.mockClear();
 
-      fireDrop(dropzone, createDtWithFiles([...files, ...images]))
-      await flushPromises(rerender, ui)
-      expect(onDropSpy).toHaveBeenCalledWith(images, [
-        {
-          file: files[0],
-          errors: [
-            {
-              code: 'file-invalid-type',
-              message: 'File type must be image/*'
-            }
-          ]
-        }
-      ], expect.anything())
-    })
+      fireDrop(dropzone, createDtWithFiles([...files, ...images]));
+      await flushPromises(rerender, ui);
+      expect(onDropSpy).toHaveBeenCalledWith(
+        images,
+        [
+          {
+            file: files[0],
+            errors: [
+              {
+                code: "file-invalid-type",
+                message: "File type must be image/*",
+              },
+            ],
+          },
+        ],
+        expect.anything()
+      );
+    });
 
-    test('onDropAccepted callback is invoked if some files are accepted', async () => {
-      const onDropAcceptedSpy = jest.fn()
+    test.only("onDropAccepted callback is invoked if some files are accepted", async () => {
+      const onDropAcceptedSpy = jest.fn();
       const ui = (
         <Dropzone accept="image/*" onDropAccepted={onDropAcceptedSpy}>
           {({ getRootProps, getInputProps }) => (
@@ -2319,27 +2456,27 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
-      const { container, rerender } = render(ui)
-      const dropzone = container.querySelector('div')
+      );
+      const { container, rerender } = render(ui);
+      const dropzone = container.querySelector("div");
 
-      fireDrop(dropzone, createDtWithFiles(files))
-      await flushPromises(rerender, ui)
-      expect(onDropAcceptedSpy).not.toHaveBeenCalled()
-      onDropAcceptedSpy.mockClear()
+      fireDrop(dropzone, createDtWithFiles(files));
+      await flushPromises(rerender, ui);
+      expect(onDropAcceptedSpy).not.toHaveBeenCalled();
+      onDropAcceptedSpy.mockClear();
 
-      fireDrop(dropzone, createDtWithFiles(images))
-      await flushPromises(rerender, ui)
-      expect(onDropAcceptedSpy).toHaveBeenCalledWith(images, expect.anything())
-      onDropAcceptedSpy.mockClear()
+      fireDrop(dropzone, createDtWithFiles(images));
+      await flushPromises(rerender, ui);
+      expect(onDropAcceptedSpy).toHaveBeenCalledWith(images, expect.anything());
+      onDropAcceptedSpy.mockClear();
 
-      fireDrop(dropzone, createDtWithFiles([...files, ...images]))
-      await flushPromises(rerender, ui)
-      expect(onDropAcceptedSpy).toHaveBeenCalledWith(images, expect.anything())
-    })
+      fireDrop(dropzone, createDtWithFiles([...files, ...images]));
+      await flushPromises(rerender, ui);
+      expect(onDropAcceptedSpy).toHaveBeenCalledWith(images, expect.anything());
+    });
 
-    test('onDropRejected callback is invoked if some files are rejected', async () => {
-      const onDropRejectedSpy = jest.fn()
+    test("onDropRejected callback is invoked if some files are rejected", async () => {
+      const onDropRejectedSpy = jest.fn();
       const ui = (
         <Dropzone accept="image/*" onDropRejected={onDropRejectedSpy}>
           {({ getRootProps, getInputProps }) => (
@@ -2348,47 +2485,53 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
-      const { container, rerender } = render(ui)
-      const dropzone = container.querySelector('div')
+      );
+      const { container, rerender } = render(ui);
+      const dropzone = container.querySelector("div");
 
-      fireDrop(dropzone, createDtWithFiles(files))
-      await flushPromises(rerender, ui)
-      expect(onDropRejectedSpy).toHaveBeenCalledWith([
-        {
-          file: files[0],
-          errors: [
-            {
-              code: 'file-invalid-type',
-              message: 'File type must be image/*',
-            }
-          ]
-        }
-      ], expect.anything())
-      onDropRejectedSpy.mockClear()
+      fireDrop(dropzone, createDtWithFiles(files));
+      await flushPromises(rerender, ui);
+      expect(onDropRejectedSpy).toHaveBeenCalledWith(
+        [
+          {
+            file: files[0],
+            errors: [
+              {
+                code: "file-invalid-type",
+                message: "File type must be image/*",
+              },
+            ],
+          },
+        ],
+        expect.anything()
+      );
+      onDropRejectedSpy.mockClear();
 
-      fireDrop(dropzone, createDtWithFiles(images))
-      await flushPromises(rerender, ui)
-      expect(onDropRejectedSpy).not.toHaveBeenCalled()
-      onDropRejectedSpy.mockClear()
+      fireDrop(dropzone, createDtWithFiles(images));
+      await flushPromises(rerender, ui);
+      expect(onDropRejectedSpy).not.toHaveBeenCalled();
+      onDropRejectedSpy.mockClear();
 
-      fireDrop(dropzone, createDtWithFiles([...files, ...images]))
-      await flushPromises(rerender, ui)
-      expect(onDropRejectedSpy).toHaveBeenCalledWith([
-        {
-          file: files[0],
-          errors: [
-            {
-              code: 'file-invalid-type',
-              message: 'File type must be image/*',
-            }
-          ]
-        }
-      ], expect.anything())
-    })
+      fireDrop(dropzone, createDtWithFiles([...files, ...images]));
+      await flushPromises(rerender, ui);
+      expect(onDropRejectedSpy).toHaveBeenCalledWith(
+        [
+          {
+            file: files[0],
+            errors: [
+              {
+                code: "file-invalid-type",
+                message: "File type must be image/*",
+              },
+            ],
+          },
+        ],
+        expect.anything()
+      );
+    });
 
-    it('accepts a dropped image when Firefox provides a bogus file type', async () => {
-      const onDropSpy = jest.fn()
+    it("accepts a dropped image when Firefox provides a bogus file type", async () => {
+      const onDropSpy = jest.fn();
       const ui = (
         <Dropzone accept="image/*" onDrop={onDropSpy}>
           {({ getRootProps, getInputProps }) => (
@@ -2397,19 +2540,19 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
-      const { container, rerender } = render(ui)
-      const dropzone = container.querySelector('div')
+      );
+      const { container, rerender } = render(ui);
+      const dropzone = container.querySelector("div");
 
-      const images = [createFile('bogus.gif', 1234, 'application/x-moz-file')]
-      fireDrop(dropzone, createDtWithFiles(images))
-      await flushPromises(rerender, ui)
+      const images = [createFile("bogus.gif", 1234, "application/x-moz-file")];
+      fireDrop(dropzone, createDtWithFiles(images));
+      await flushPromises(rerender, ui);
 
-      expect(onDropSpy).toHaveBeenCalledWith(images, [], expect.anything())
-    })
+      expect(onDropSpy).toHaveBeenCalledWith(images, [], expect.anything());
+    });
 
-    it('filters files according to {maxSize}', async () => {
-      const onDropSpy = jest.fn()
+    it("filters files according to {maxSize}", async () => {
+      const onDropSpy = jest.fn();
       const ui = (
         <Dropzone onDrop={onDropSpy} maxSize={1111}>
           {({ getRootProps, getInputProps }) => (
@@ -2418,37 +2561,41 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
-      const { container, rerender } = render(ui)
-      const dropzone = container.querySelector('div')
+      );
+      const { container, rerender } = render(ui);
+      const dropzone = container.querySelector("div");
 
-      fireDrop(dropzone, createDtWithFiles(images))
-      await flushPromises(rerender, ui)
+      fireDrop(dropzone, createDtWithFiles(images));
+      await flushPromises(rerender, ui);
 
-      expect(onDropSpy).toHaveBeenCalledWith([], [
-        {
-          file: images[0],
-          errors: [
-            {
-              code: 'file-too-large',
-              message: 'File is larger than 1111 bytes',
-            }
-          ]
-        },
-        {
-          file: images[1],
-          errors: [
-            {
-              code: 'file-too-large',
-              message: 'File is larger than 1111 bytes',
-            }
-          ]
-        },
-      ], expect.anything())
-    })
+      expect(onDropSpy).toHaveBeenCalledWith(
+        [],
+        [
+          {
+            file: images[0],
+            errors: [
+              {
+                code: "file-too-large",
+                message: "File is larger than 1111 bytes",
+              },
+            ],
+          },
+          {
+            file: images[1],
+            errors: [
+              {
+                code: "file-too-large",
+                message: "File is larger than 1111 bytes",
+              },
+            ],
+          },
+        ],
+        expect.anything()
+      );
+    });
 
-    it('filters files according to {minSize}', async () => {
-      const onDropSpy = jest.fn()
+    it("filters files according to {minSize}", async () => {
+      const onDropSpy = jest.fn();
       const ui = (
         <Dropzone onDrop={onDropSpy} minSize={1112}>
           {({ getRootProps, getInputProps }) => (
@@ -2457,38 +2604,42 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
-      const { container, rerender } = render(ui)
-      const dropzone = container.querySelector('div')
+      );
+      const { container, rerender } = render(ui);
+      const dropzone = container.querySelector("div");
 
-      fireDrop(dropzone, createDtWithFiles(files))
-      await flushPromises(rerender, ui)
+      fireDrop(dropzone, createDtWithFiles(files));
+      await flushPromises(rerender, ui);
 
-      expect(onDropSpy).toHaveBeenCalledWith([], [
-        {
-          file: files[0],
-          errors: [
-            {
-              code: 'file-too-small',
-              message: 'File is smaller than 1112 bytes',
-            }
-          ]
-        }
-      ], expect.anything())
-    })
-  })
+      expect(onDropSpy).toHaveBeenCalledWith(
+        [],
+        [
+          {
+            file: files[0],
+            errors: [
+              {
+                code: "file-too-small",
+                message: "File is smaller than 1112 bytes",
+              },
+            ],
+          },
+        ],
+        expect.anything()
+      );
+    });
+  });
 
-  describe('onFileDialogCancel', () => {
+  describe("onFileDialogCancel", () => {
     beforeEach(() => {
-      jest.useFakeTimers()
-    })
+      jest.useFakeTimers();
+    });
 
     afterEach(() => {
-      jest.useRealTimers()
-    })
+      jest.useRealTimers();
+    });
 
-    it('is not invoked every time window receives focus', () => {
-      const onFileDialogCancelSpy = jest.fn()
+    it("is not invoked every time window receives focus", () => {
+      const onFileDialogCancelSpy = jest.fn();
 
       render(
         <Dropzone onFileDialogCancel={onFileDialogCancelSpy}>
@@ -2498,18 +2649,18 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
+      );
 
-      dispatchEvt(document.body, 'focus')
-      drainTimers()
+      dispatchEvt(document.body, "focus");
+      drainTimers();
 
-      expect(onFileDialogCancelSpy).not.toHaveBeenCalled()
-    })
+      expect(onFileDialogCancelSpy).not.toHaveBeenCalled();
+    });
 
-    it('resets {isFileDialogActive}', () => {
-      const activeRef = createRef()
-      const active = <span ref={activeRef}>I am active</span>
-      const onFileDialogCancelSpy = jest.fn()
+    it("resets {isFileDialogActive}", () => {
+      const activeRef = createRef();
+      const active = <span ref={activeRef}>I am active</span>;
+      const onFileDialogCancelSpy = jest.fn();
 
       const { container } = render(
         <Dropzone onFileDialogCancel={onFileDialogCancelSpy}>
@@ -2523,26 +2674,26 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
+      );
 
-      const dropzone = container.querySelector('div')
-      const btn = container.querySelector('button')
+      const dropzone = container.querySelector("div");
+      const btn = container.querySelector("button");
 
-      btn.click()
-      drainTimers()
-      const ref = activeRef.current
-      expect(ref).not.toBeNull()
-      expect(dropzone).toContainElement(ref)
+      btn.click();
+      drainTimers();
+      const ref = activeRef.current;
+      expect(ref).not.toBeNull();
+      expect(dropzone).toContainElement(ref);
 
-      dispatchEvt(document.body, 'focus')
-      drainTimers()
+      dispatchEvt(document.body, "focus");
+      drainTimers();
 
-      expect(onFileDialogCancelSpy).toHaveBeenCalled()
-      expect(dropzone).not.toContainElement(ref)
-    })
+      expect(onFileDialogCancelSpy).toHaveBeenCalled();
+      expect(dropzone).not.toContainElement(ref);
+    });
 
-    it('is not invoked if <input> is not rendered', () => {
-      const onFileDialogCancelSpy = jest.fn()
+    it("is not invoked if <input> is not rendered", () => {
+      const onFileDialogCancelSpy = jest.fn();
       const { container, rerender } = render(
         <Dropzone onFileDialogCancel={onFileDialogCancelSpy}>
           {({ getRootProps, getInputProps, open }) => (
@@ -2554,27 +2705,27 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
+      );
 
-      const btn = container.querySelector('button')
-      btn.click()
-      drainTimers()
+      const btn = container.querySelector("button");
+      btn.click();
+      drainTimers();
 
       rerender(
         <Dropzone onFileDialogCancel={onFileDialogCancelSpy}>
           {({ getRootProps }) => <div {...getRootProps()} />}
         </Dropzone>
-      )
-      drainTimers()
+      );
+      drainTimers();
 
-      dispatchEvt(document.body, 'focus')
-      drainTimers()
+      dispatchEvt(document.body, "focus");
+      drainTimers();
 
-      expect(onFileDialogCancelSpy).not.toHaveBeenCalled()
-    })
+      expect(onFileDialogCancelSpy).not.toHaveBeenCalled();
+    });
 
-    it('is not invoked if files were selected', () => {
-      const onFileDialogCancelSpy = jest.fn()
+    it("is not invoked if files were selected", () => {
+      const onFileDialogCancelSpy = jest.fn();
 
       const { container } = render(
         <Dropzone onFileDialogCancel={onFileDialogCancelSpy}>
@@ -2587,22 +2738,22 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
+      );
 
-      const input = container.querySelector('input')
-      Object.defineProperty(input, 'files', { value: files })
+      const input = container.querySelector("input");
+      Object.defineProperty(input, "files", { value: files });
 
-      const btn = container.querySelector('button')
-      btn.click()
-      drainTimers()
+      const btn = container.querySelector("button");
+      btn.click();
+      drainTimers();
 
-      dispatchEvt(document.body, 'focus')
-      drainTimers()
+      dispatchEvt(document.body, "focus");
+      drainTimers();
 
-      expect(onFileDialogCancelSpy).not.toHaveBeenCalled()
-    })
+      expect(onFileDialogCancelSpy).not.toHaveBeenCalled();
+    });
 
-    it('does not throw if callback is not provided', () => {
+    it("does not throw if callback is not provided", () => {
       const { container } = render(
         <Dropzone onFileDialogCancel={null}>
           {({ getRootProps, getInputProps, open }) => (
@@ -2614,23 +2765,23 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
+      );
 
-      const btn = container.querySelector('button')
-      btn.click()
-      drainTimers()
+      const btn = container.querySelector("button");
+      btn.click();
+      drainTimers();
 
       const fn = () => {
-        dispatchEvt(document.body, 'focus')
-        drainTimers()
-      }
-      expect(fn).not.toThrow()
-    })
-  })
+        dispatchEvt(document.body, "focus");
+        drainTimers();
+      };
+      expect(fn).not.toThrow();
+    });
+  });
 
-  describe('{open}', () => {
-    it('can open file dialog programmatically', () => {
-      const onClickSpy = jest.spyOn(HTMLInputElement.prototype, 'click')
+  describe("{open}", () => {
+    it("can open file dialog programmatically", () => {
+      const onClickSpy = jest.spyOn(HTMLInputElement.prototype, "click");
       const { container } = render(
         <Dropzone>
           {({ getRootProps, getInputProps, open }) => (
@@ -2642,18 +2793,18 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
+      );
 
-      const btn = container.querySelector('button')
+      const btn = container.querySelector("button");
 
-      btn.click()
+      btn.click();
 
-      expect(onClickSpy).toHaveBeenCalled()
-    })
+      expect(onClickSpy).toHaveBeenCalled();
+    });
 
-    it('sets {isFileDialogActive} state', () => {
-      const activeRef = createRef()
-      const active = <span ref={activeRef}>I am active</span>
+    it("sets {isFileDialogActive} state", () => {
+      const activeRef = createRef();
+      const active = <span ref={activeRef}>I am active</span>;
       const { container } = render(
         <Dropzone>
           {({ getRootProps, getInputProps, isFileDialogActive, open }) => (
@@ -2666,20 +2817,20 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
+      );
 
-      const dropzone = container.querySelector('div')
-      const btn = container.querySelector('button')
+      const dropzone = container.querySelector("div");
+      const btn = container.querySelector("button");
 
-      btn.click()
+      btn.click();
 
-      const ref = activeRef.current
-      expect(ref).not.toBeNull()
-      expect(dropzone).toContainElement(ref)
-    })
+      const ref = activeRef.current;
+      expect(ref).not.toBeNull();
+      expect(dropzone).toContainElement(ref);
+    });
 
-    it('does nothing if {disabled} is true', () => {
-      const onClickSpy = jest.spyOn(HTMLInputElement.prototype, 'click')
+    it("does nothing if {disabled} is true", () => {
+      const onClickSpy = jest.spyOn(HTMLInputElement.prototype, "click");
       const { container } = render(
         <Dropzone disabled>
           {({ getRootProps, getInputProps, open }) => (
@@ -2691,16 +2842,16 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
+      );
 
-      const btn = container.querySelector('button')
+      const btn = container.querySelector("button");
 
-      btn.click()
+      btn.click();
 
-      expect(onClickSpy).not.toHaveBeenCalled()
-    })
+      expect(onClickSpy).not.toHaveBeenCalled();
+    });
 
-    it('does not throw if <input> is missing', () => {
+    it("does not throw if <input> is missing", () => {
       const { container } = render(
         <Dropzone>
           {({ getRootProps, open }) => (
@@ -2711,25 +2862,25 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
+      );
 
-      const btn = container.querySelector('button')
+      const btn = container.querySelector("button");
 
-      const fn = () => btn.click()
-      expect(fn).not.toThrow()
-    })
-  })
+      const fn = () => btn.click();
+      expect(fn).not.toThrow();
+    });
+  });
 
-  describe('validator', () => {
-    it('rejects with custom error', async () => {
-      const validator = file => {
+  describe("validator", () => {
+    it("rejects with custom error", async () => {
+      const validator = (file) => {
         if (/dogs/i.test(file.name))
-          return { code: 'dogs-not-allowed', message: 'Dogs not allowed' };
+          return { code: "dogs-not-allowed", message: "Dogs not allowed" };
 
         return null;
-      }
-      
-      const onDropSpy = jest.fn()
+      };
+
+      const onDropSpy = jest.fn();
 
       const ui = (
         <Dropzone validator={validator} onDrop={onDropSpy} multiple={true}>
@@ -2739,84 +2890,88 @@ describe('useDropzone() hook', () => {
             </div>
           )}
         </Dropzone>
-      )
+      );
 
-      const { container, rerender } = render(ui)
-      const dropzone = container.querySelector('div')
+      const { container, rerender } = render(ui);
+      const dropzone = container.querySelector("div");
 
-      fireDrop(dropzone, createDtWithFiles(images))
-      await flushPromises(rerender, ui)
+      fireDrop(dropzone, createDtWithFiles(images));
+      await flushPromises(rerender, ui);
 
-      expect(onDropSpy).toHaveBeenCalledWith([images[0]], [
-        {
-          file: images[1],
-          errors: [
-            {
-              code: 'dogs-not-allowed',
-              message: 'Dogs not allowed',
-            }
-          ]
-        }
-      ], expect.anything())
-    })
-  })
-})
+      expect(onDropSpy).toHaveBeenCalledWith(
+        [images[0]],
+        [
+          {
+            file: images[1],
+            errors: [
+              {
+                code: "dogs-not-allowed",
+                message: "Dogs not allowed",
+              },
+            ],
+          },
+        ],
+        expect.anything()
+      );
+    });
+  });
+});
 
 async function flushPromises(rerender, ui) {
-  await act(() => waitFor(() => rerender(ui)))
+  await act(() => waitFor(() => rerender(ui)));
 }
 
 function drainTimers() {
-  act(() => jest.runAllTimers())
+  act(() => jest.runAllTimers());
 }
 
 function createDtWithFiles(files = []) {
   return {
     dataTransfer: {
       files,
-      items: files.map(file => ({
-        kind: 'file',
+      items: files.map((file) => ({
+        kind: "file",
         size: file.size,
         type: file.type,
-        getAsFile: () => file
+        getAsFile: () => file,
       })),
-      types: ['Files']
-    }
-  }
+      types: ["Files"],
+    },
+  };
 }
 
 function fireDragEnter(node, data) {
-  dispatchEvt(node, 'dragenter', data)
+  dispatchEvt(node, "dragenter", data);
 }
 
 function fireDragOver(node, data) {
-  dispatchEvt(node, 'dragover', data)
+  dispatchEvt(node, "dragover", data);
 }
 
 function fireDragLeave(node, data) {
-  dispatchEvt(node, 'dragleave', data)
+  dispatchEvt(node, "dragleave", data);
 }
 
 function fireDrop(node, data) {
-  dispatchEvt(node, 'drop', data)
+  dispatchEvt(node, "drop", data);
 }
 
 // Using fireEvent.* doesn't work for our use case,
 // we cannot set the event props
 function dispatchEvt(node, type, data) {
-  const event = new Event(type, { bubbles: true })
+  const event = new Event(type, { bubbles: true });
   if (data) {
-    Object.assign(event, data)
+    Object.assign(event, data);
   }
-  fireEvent(node, event)
+  fireEvent(node, event);
 }
 
 function createFile(name, size, type) {
-  const file = new File([], name, { type })
-  Object.defineProperty(file, 'size', {
+  const file = new File([], name, { type });
+  Object.defineProperty(file, "size", {
     get() {
-      return size
-    }
-  })
-  return file
+      return size;
+    },
+  });
+  return file;
 }

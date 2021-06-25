@@ -1,119 +1,210 @@
-import accepts from 'attr-accept'
+import accepts from "attr-accept";
 
 // Error codes
-export const FILE_INVALID_TYPE = 'file-invalid-type'
-export const FILE_TOO_LARGE = 'file-too-large'
-export const FILE_TOO_SMALL = 'file-too-small'
-export const TOO_MANY_FILES = 'too-many-files'
+export const FILE_INVALID_TYPE = "file-invalid-type";
+export const FILE_TOO_LARGE = "file-too-large";
+export const FILE_TOO_SMALL = "file-too-small";
+export const TOO_MANY_FILES = "too-many-files";
 
 // File Errors
-export const getInvalidTypeRejectionErr = accept => {
-  accept = Array.isArray(accept) && accept.length === 1 ? accept[0] : accept
-  const messageSuffix = Array.isArray(accept) ? `one of ${accept.join(', ')}` : accept
+export const getInvalidTypeRejectionErr = (accept) => {
+  accept = Array.isArray(accept) && accept.length === 1 ? accept[0] : accept;
+  const messageSuffix = Array.isArray(accept)
+    ? `one of ${accept.join(", ")}`
+    : accept;
   return {
     code: FILE_INVALID_TYPE,
-    message: `File type must be ${messageSuffix}`
-  }
-}
+    message: `File type must be ${messageSuffix}`,
+  };
+};
 
-export const getTooLargeRejectionErr = maxSize => {
+export const getTooLargeRejectionErr = (maxSize) => {
   return {
     code: FILE_TOO_LARGE,
-    message: `File is larger than ${maxSize} bytes`
-  }
-}
+    message: `File is larger than ${maxSize} bytes`,
+  };
+};
 
-export const getTooSmallRejectionErr = minSize => {
+export const getTooSmallRejectionErr = (minSize) => {
   return {
     code: FILE_TOO_SMALL,
-    message: `File is smaller than ${minSize} bytes`
-  }
-}
+    message: `File is smaller than ${minSize} bytes`,
+  };
+};
 
 export const TOO_MANY_FILES_REJECTION = {
   code: TOO_MANY_FILES,
-  message: 'Too many files'
-}
+  message: "Too many files",
+};
 
 // Firefox versions prior to 53 return a bogus MIME type for every file drag, so dragovers with
 // that MIME type will always be accepted
 export function fileAccepted(file, accept) {
-  const isAcceptable = file.type === 'application/x-moz-file' || accepts(file, accept)
-  return [isAcceptable, isAcceptable ? null : getInvalidTypeRejectionErr(accept)]
+  const isAcceptable =
+    file.type === "application/x-moz-file" || accepts(file, accept);
+  return [
+    isAcceptable,
+    isAcceptable ? null : getInvalidTypeRejectionErr(accept),
+  ];
 }
 
 export function fileMatchSize(file, minSize, maxSize) {
   if (isDefined(file.size)) {
     if (isDefined(minSize) && isDefined(maxSize)) {
-      if (file.size > maxSize) return [false, getTooLargeRejectionErr(maxSize)]
-      if (file.size < minSize) return [false, getTooSmallRejectionErr(minSize)]
+      if (file.size > maxSize) return [false, getTooLargeRejectionErr(maxSize)];
+      if (file.size < minSize) return [false, getTooSmallRejectionErr(minSize)];
     } else if (isDefined(minSize) && file.size < minSize)
-      return [false, getTooSmallRejectionErr(minSize)]
+      return [false, getTooSmallRejectionErr(minSize)];
     else if (isDefined(maxSize) && file.size > maxSize)
-      return [false, getTooLargeRejectionErr(maxSize)]
+      return [false, getTooLargeRejectionErr(maxSize)];
   }
-  return [true, null]
+  return [true, null];
+}
+
+export function validatorSchema(file, accept, validateSchema) {
+  const schemaSize = validateSchema.length;
+
+  let acceptedResult = false;
+  let errors = null;
+
+  for (let i = 0; i < schemaSize; i++) {
+    const { minSize, maxSize, accept, validator } = validateSchema[i];
+
+    const [accepted] = fileAccepted(file, accept);
+    const [sizeMatch, sizeError] = fileMatchSize(file, minSize, maxSize);
+    const customErrors = validator ? validator(file) : null;
+
+    if (accepted) {
+      if (sizeMatch && !customErrors) {
+        errors = null;
+        acceptedResult = true;
+        break;
+      }
+      errors = [sizeError];
+
+      if (customErrors) {
+        errors.push(customErrors);
+      }
+
+      break;
+    }
+  }
+
+  if (!errors && !acceptedResult) {
+    errors = [getInvalidTypeRejectionErr(accept)];
+  }
+
+  return [acceptedResult, errors];
+}
+
+export function filterFiles(
+  files,
+  accept,
+  minSize,
+  maxSize,
+  validator,
+  validateSchema
+) {
+  const acceptedFiles = [];
+  const fileRejections = [];
+
+  const finalValidators = validateSchema
+    ? validateSchema
+    : [{ minSize, maxSize }];
+
+  files.forEach((file) => {
+    const [accepted, errors] = validatorSchema(file, accept, finalValidators);
+    const customErrors = validator ? validator(file) : null;
+
+    if (accepted && !customErrors) {
+      acceptedFiles.push(file);
+    } else {
+      let finalErrors = errors ? [...errors] : [];
+
+      if (customErrors) {
+        finalErrors = finalErrors.concat(customErrors);
+      }
+
+      fileRejections.push({ file, errors: finalErrors.filter((e) => e) });
+    }
+  });
+
+  console.log(acceptedFiles, fileRejections);
+
+  return [acceptedFiles, fileRejections];
 }
 
 function isDefined(value) {
-  return value !== undefined && value !== null
+  return value !== undefined && value !== null;
 }
 
-export function allFilesAccepted({ files, accept, minSize, maxSize, multiple, maxFiles }) {
-  if ((!multiple && files.length > 1) || (multiple && maxFiles >= 1 &&  files.length > maxFiles) ) {
+export function allFilesAccepted({
+  files,
+  accept,
+  minSize,
+  maxSize,
+  multiple,
+  maxFiles,
+}) {
+  if (
+    (!multiple && files.length > 1) ||
+    (multiple && maxFiles >= 1 && files.length > maxFiles)
+  ) {
     return false;
   }
 
-  return files.every(file => {
-    const [accepted] = fileAccepted(file, accept)
-    const [sizeMatch] = fileMatchSize(file, minSize, maxSize)
-    return accepted && sizeMatch
-  })
+  return files.every((file) => {
+    const [accepted] = fileAccepted(file, accept);
+    const [sizeMatch] = fileMatchSize(file, minSize, maxSize);
+    return accepted && sizeMatch;
+  });
 }
 
 // React's synthetic events has event.isPropagationStopped,
 // but to remain compatibility with other libs (Preact) fall back
 // to check event.cancelBubble
 export function isPropagationStopped(event) {
-  if (typeof event.isPropagationStopped === 'function') {
-    return event.isPropagationStopped()
-  } else if (typeof event.cancelBubble !== 'undefined') {
-    return event.cancelBubble
+  if (typeof event.isPropagationStopped === "function") {
+    return event.isPropagationStopped();
+  } else if (typeof event.cancelBubble !== "undefined") {
+    return event.cancelBubble;
   }
-  return false
+  return false;
 }
 
 export function isEvtWithFiles(event) {
   if (!event.dataTransfer) {
-    return !!event.target && !!event.target.files
+    return !!event.target && !!event.target.files;
   }
   // https://developer.mozilla.org/en-US/docs/Web/API/DataTransfer/types
   // https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API/Recommended_drag_types#file
   return Array.prototype.some.call(
     event.dataTransfer.types,
-    type => type === 'Files' || type === 'application/x-moz-file'
-  )
+    (type) => type === "Files" || type === "application/x-moz-file"
+  );
 }
 
 export function isKindFile(item) {
-  return typeof item === 'object' && item !== null && item.kind === 'file'
+  return typeof item === "object" && item !== null && item.kind === "file";
 }
 
 // allow the entire document to be a drag target
 export function onDocumentDragOver(event) {
-  event.preventDefault()
+  event.preventDefault();
 }
 
 function isIe(userAgent) {
-  return userAgent.indexOf('MSIE') !== -1 || userAgent.indexOf('Trident/') !== -1
+  return (
+    userAgent.indexOf("MSIE") !== -1 || userAgent.indexOf("Trident/") !== -1
+  );
 }
 
 function isEdge(userAgent) {
-  return userAgent.indexOf('Edge/') !== -1
+  return userAgent.indexOf("Edge/") !== -1;
 }
 
 export function isIeOrEdge(userAgent = window.navigator.userAgent) {
-  return isIe(userAgent) || isEdge(userAgent)
+  return isIe(userAgent) || isEdge(userAgent);
 }
 
 /**
@@ -128,10 +219,10 @@ export function isIeOrEdge(userAgent = window.navigator.userAgent) {
  */
 export function composeEventHandlers(...fns) {
   return (event, ...args) =>
-    fns.some(fn => {
+    fns.some((fn) => {
       if (!isPropagationStopped(event) && fn) {
-        fn(event, ...args)
+        fn(event, ...args);
       }
-      return isPropagationStopped(event)
-    })
+      return isPropagationStopped(event);
+    });
 }

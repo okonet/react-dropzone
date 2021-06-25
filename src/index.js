@@ -7,21 +7,20 @@ import React, {
   useImperativeHandle,
   useMemo,
   useReducer,
-  useRef
-} from 'react'
-import PropTypes from 'prop-types'
-import { fromEvent } from 'file-selector'
+  useRef,
+} from "react";
+import PropTypes from "prop-types";
+import { fromEvent } from "file-selector";
 import {
   allFilesAccepted,
   composeEventHandlers,
-  fileAccepted,
-  fileMatchSize,
+  filterFiles,
   isEvtWithFiles,
   isIeOrEdge,
   isPropagationStopped,
   onDocumentDragOver,
-  TOO_MANY_FILES_REJECTION
-} from './utils/index'
+  TOO_MANY_FILES_REJECTION,
+} from "./utils/index";
 
 /**
  * Convenience wrapper component for the `useDropzone` hook
@@ -38,15 +37,15 @@ import {
  * ```
  */
 const Dropzone = forwardRef(({ children, ...params }, ref) => {
-  const { open, ...props } = useDropzone(params)
+  const { open, ...props } = useDropzone(params);
 
-  useImperativeHandle(ref, () => ({ open }), [open])
+  useImperativeHandle(ref, () => ({ open }), [open]);
 
   // TODO: Figure out why react-styleguidist cannot create docs if we don't return a jsx element
-  return <Fragment>{children({ ...props, open })}</Fragment>
-})
+  return <Fragment>{children({ ...props, open })}</Fragment>;
+});
 
-Dropzone.displayName = 'Dropzone'
+Dropzone.displayName = "Dropzone";
 
 // Add default props for react-docgen
 const defaultProps = {
@@ -61,10 +60,10 @@ const defaultProps = {
   noKeyboard: false,
   noDrag: false,
   noDragEventsBubbling: false,
-  validator: null
-}
+  validator: null,
+};
 
-Dropzone.defaultProps = defaultProps
+Dropzone.defaultProps = defaultProps;
 
 Dropzone.propTypes = {
   /**
@@ -93,7 +92,10 @@ Dropzone.propTypes = {
    * Windows. In some cases there might not be a mime type set at all.
    * See: https://github.com/react-dropzone/react-dropzone/issues/276
    */
-  accept: PropTypes.oneOfType([PropTypes.string, PropTypes.arrayOf(PropTypes.string)]),
+  accept: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.arrayOf(PropTypes.string),
+  ]),
 
   /**
    * Allow drag 'n' drop (or selection from the file dialog) of multiple files
@@ -230,14 +232,14 @@ Dropzone.propTypes = {
   onDropRejected: PropTypes.func,
 
   /**
-   * Custom validation function 
+   * Custom validation function
    * @param {File} file
    * @returns {FileError|FileError[]}
    */
-  validator: PropTypes.func
-}
+  validator: PropTypes.func,
+};
 
-export default Dropzone
+export default Dropzone;
 
 /**
  * A function that is invoked for the `dragenter`,
@@ -311,8 +313,8 @@ const initialState = {
   isDragReject: false,
   draggedFiles: [],
   acceptedFiles: [],
-  fileRejections: []
-}
+  fileRejections: [],
+};
 
 /**
  * A React hook that creates a drag 'n' drop area.
@@ -407,26 +409,27 @@ export function useDropzone(options = {}) {
     noKeyboard,
     noDrag,
     noDragEventsBubbling,
-    validator
+    validator,
+    validatorSchema,
   } = {
     ...defaultProps,
-    ...options
-  }
+    ...options,
+  };
 
-  const rootRef = useRef(null)
-  const inputRef = useRef(null)
+  const rootRef = useRef(null);
+  const inputRef = useRef(null);
 
-  const [state, dispatch] = useReducer(reducer, initialState)
-  const { isFocused, isFileDialogActive, draggedFiles } = state
+  const [state, dispatch] = useReducer(reducer, initialState);
+  const { isFocused, isFileDialogActive, draggedFiles } = state;
 
   // Fn for opening the file dialog programmatically
   const openFileDialog = useCallback(() => {
     if (inputRef.current) {
-      dispatch({ type: 'openDialog' })
-      inputRef.current.value = null
-      inputRef.current.click()
+      dispatch({ type: "openDialog" });
+      inputRef.current.value = null;
+      inputRef.current.click();
     }
-  }, [dispatch])
+  }, [dispatch]);
 
   // Update file dialog active state when the window is focused on
   const onWindowFocus = () => {
@@ -434,240 +437,231 @@ export function useDropzone(options = {}) {
     if (isFileDialogActive) {
       setTimeout(() => {
         if (inputRef.current) {
-          const { files } = inputRef.current
+          const { files } = inputRef.current;
 
           if (!files.length) {
-            dispatch({ type: 'closeDialog' })
+            dispatch({ type: "closeDialog" });
 
-            if (typeof onFileDialogCancel === 'function') {
-              onFileDialogCancel()
+            if (typeof onFileDialogCancel === "function") {
+              onFileDialogCancel();
             }
           }
         }
-      }, 300)
+      }, 300);
     }
-  }
+  };
   useEffect(() => {
-    window.addEventListener('focus', onWindowFocus, false)
+    window.addEventListener("focus", onWindowFocus, false);
     return () => {
-      window.removeEventListener('focus', onWindowFocus, false)
-    }
-  }, [inputRef, isFileDialogActive, onFileDialogCancel])
+      window.removeEventListener("focus", onWindowFocus, false);
+    };
+  }, [inputRef, isFileDialogActive, onFileDialogCancel]);
 
   // Cb to open the file dialog when SPACE/ENTER occurs on the dropzone
   const onKeyDownCb = useCallback(
-    event => {
+    (event) => {
       // Ignore keyboard events bubbling up the DOM tree
       if (!rootRef.current || !rootRef.current.isEqualNode(event.target)) {
-        return
+        return;
       }
 
       if (event.keyCode === 32 || event.keyCode === 13) {
-        event.preventDefault()
-        openFileDialog()
+        event.preventDefault();
+        openFileDialog();
       }
     },
     [rootRef, inputRef]
-  )
+  );
 
   // Update focus state for the dropzone
   const onFocusCb = useCallback(() => {
-    dispatch({ type: 'focus' })
-  }, [])
+    dispatch({ type: "focus" });
+  }, []);
   const onBlurCb = useCallback(() => {
-    dispatch({ type: 'blur' })
-  }, [])
+    dispatch({ type: "blur" });
+  }, []);
 
   // Cb to open the file dialog when click occurs on the dropzone
   const onClickCb = useCallback(() => {
     if (noClick) {
-      return
+      return;
     }
 
     // In IE11/Edge the file-browser dialog is blocking, therefore, use setTimeout()
     // to ensure React can handle state changes
     // See: https://github.com/react-dropzone/react-dropzone/issues/450
     if (isIeOrEdge()) {
-      setTimeout(openFileDialog, 0)
+      setTimeout(openFileDialog, 0);
     } else {
-      openFileDialog()
+      openFileDialog();
     }
-  }, [inputRef, noClick])
+  }, [inputRef, noClick]);
 
-  const dragTargetsRef = useRef([])
-  const onDocumentDrop = event => {
+  const dragTargetsRef = useRef([]);
+  const onDocumentDrop = (event) => {
     if (rootRef.current && rootRef.current.contains(event.target)) {
       // If we intercepted an event for our instance, let it propagate down to the instance's onDrop handler
-      return
+      return;
     }
-    event.preventDefault()
-    dragTargetsRef.current = []
-  }
+    event.preventDefault();
+    dragTargetsRef.current = [];
+  };
 
   useEffect(() => {
     if (preventDropOnDocument) {
-      document.addEventListener('dragover', onDocumentDragOver, false)
-      document.addEventListener('drop', onDocumentDrop, false)
+      document.addEventListener("dragover", onDocumentDragOver, false);
+      document.addEventListener("drop", onDocumentDrop, false);
     }
 
     return () => {
       if (preventDropOnDocument) {
-        document.removeEventListener('dragover', onDocumentDragOver)
-        document.removeEventListener('drop', onDocumentDrop)
+        document.removeEventListener("dragover", onDocumentDragOver);
+        document.removeEventListener("drop", onDocumentDrop);
       }
-    }
-  }, [rootRef, preventDropOnDocument])
+    };
+  }, [rootRef, preventDropOnDocument]);
 
   const onDragEnterCb = useCallback(
-    event => {
-      event.preventDefault()
+    (event) => {
+      event.preventDefault();
       // Persist here because we need the event later after getFilesFromEvent() is done
-      event.persist()
-      stopPropagation(event)
+      event.persist();
+      stopPropagation(event);
 
-      dragTargetsRef.current = [...dragTargetsRef.current, event.target]
+      dragTargetsRef.current = [...dragTargetsRef.current, event.target];
 
       if (isEvtWithFiles(event)) {
-        Promise.resolve(getFilesFromEvent(event)).then(draggedFiles => {
+        Promise.resolve(getFilesFromEvent(event)).then((draggedFiles) => {
           if (isPropagationStopped(event) && !noDragEventsBubbling) {
-            return
+            return;
           }
 
           dispatch({
             draggedFiles,
             isDragActive: true,
-            type: 'setDraggedFiles'
-          })
+            type: "setDraggedFiles",
+          });
 
           if (onDragEnter) {
-            onDragEnter(event)
+            onDragEnter(event);
           }
-        })
+        });
       }
     },
     [getFilesFromEvent, onDragEnter, noDragEventsBubbling]
-  )
+  );
 
   const onDragOverCb = useCallback(
-    event => {
-      event.preventDefault()
-      event.persist()
-      stopPropagation(event)
+    (event) => {
+      event.preventDefault();
+      event.persist();
+      stopPropagation(event);
 
       const hasFiles = isEvtWithFiles(event);
       if (hasFiles && event.dataTransfer) {
         try {
-          event.dataTransfer.dropEffect = 'copy'
+          event.dataTransfer.dropEffect = "copy";
         } catch {} /* eslint-disable-line no-empty */
       }
 
       if (hasFiles && onDragOver) {
-        onDragOver(event)
+        onDragOver(event);
       }
 
-      return false
+      return false;
     },
     [onDragOver, noDragEventsBubbling]
-  )
+  );
 
   const onDragLeaveCb = useCallback(
-    event => {
-      event.preventDefault()
-      event.persist()
-      stopPropagation(event)
+    (event) => {
+      event.preventDefault();
+      event.persist();
+      stopPropagation(event);
 
       // Only deactivate once the dropzone and all children have been left
       const targets = dragTargetsRef.current.filter(
-        target => rootRef.current && rootRef.current.contains(target)
-      )
+        (target) => rootRef.current && rootRef.current.contains(target)
+      );
       // Make sure to remove a target present multiple times only once
       // (Firefox may fire dragenter/dragleave multiple times on the same element)
-      const targetIdx = targets.indexOf(event.target)
+      const targetIdx = targets.indexOf(event.target);
       if (targetIdx !== -1) {
-        targets.splice(targetIdx, 1)
+        targets.splice(targetIdx, 1);
       }
-      dragTargetsRef.current = targets
+      dragTargetsRef.current = targets;
       if (targets.length > 0) {
-        return
+        return;
       }
 
       dispatch({
         isDragActive: false,
-        type: 'setDraggedFiles',
-        draggedFiles: []
-      })
+        type: "setDraggedFiles",
+        draggedFiles: [],
+      });
 
       if (isEvtWithFiles(event) && onDragLeave) {
-        onDragLeave(event)
+        onDragLeave(event);
       }
     },
     [rootRef, onDragLeave, noDragEventsBubbling]
-  )
+  );
 
   const onDropCb = useCallback(
-    event => {
-      event.preventDefault()
+    (event) => {
+      event.preventDefault();
       // Persist here because we need the event later after getFilesFromEvent() is done
-      event.persist()
-      stopPropagation(event)
+      event.persist();
+      stopPropagation(event);
 
-      dragTargetsRef.current = []
+      dragTargetsRef.current = [];
 
       if (isEvtWithFiles(event)) {
-        Promise.resolve(getFilesFromEvent(event)).then(files => {
+        Promise.resolve(getFilesFromEvent(event)).then((files) => {
           if (isPropagationStopped(event) && !noDragEventsBubbling) {
-            return
+            return;
           }
 
-          const acceptedFiles = []
-          const fileRejections = []
+          const [acceptedFiles, fileRejections] = filterFiles(
+            files,
+            accept,
+            minSize,
+            maxSize,
+            validator,
+            validatorSchema
+          );
 
-          files.forEach(file => {
-            const [accepted, acceptError] = fileAccepted(file, accept)
-            const [sizeMatch, sizeError] = fileMatchSize(file, minSize, maxSize)
-            const customErrors = validator ? validator(file) : null;
-
-            if (accepted && sizeMatch && !customErrors) {
-              acceptedFiles.push(file)
-            } else {
-              let errors = [acceptError, sizeError];
-              
-              if (customErrors) {
-                errors = errors.concat(customErrors);
-              }
-
-              fileRejections.push({ file, errors: errors.filter(e => e) })
-            }
-          })
-
-          if ((!multiple && acceptedFiles.length > 1) || (multiple && maxFiles >= 1 &&  acceptedFiles.length > maxFiles)) {
+          if (
+            (!multiple && acceptedFiles.length > 1) ||
+            (multiple && maxFiles >= 1 && acceptedFiles.length > maxFiles)
+          ) {
             // Reject everything and empty accepted files
-            acceptedFiles.forEach(file => {
-              fileRejections.push({ file, errors: [TOO_MANY_FILES_REJECTION] })
-            })
-            acceptedFiles.splice(0)
+            acceptedFiles.forEach((file) => {
+              fileRejections.push({ file, errors: [TOO_MANY_FILES_REJECTION] });
+            });
+            acceptedFiles.splice(0);
           }
-        
+
           dispatch({
             acceptedFiles,
             fileRejections,
-            type: 'setFiles'
-          })
+            type: "setFiles",
+          });
 
           if (onDrop) {
-            onDrop(acceptedFiles, fileRejections, event)
+            onDrop(acceptedFiles, fileRejections, event);
           }
 
           if (fileRejections.length > 0 && onDropRejected) {
-            onDropRejected(fileRejections, event)
+            onDropRejected(fileRejections, event);
           }
 
           if (acceptedFiles.length > 0 && onDropAccepted) {
-            onDropAccepted(acceptedFiles, event)
+            onDropAccepted(acceptedFiles, event);
           }
-        })
+        });
       }
-      dispatch({ type: 'reset' })
+      dispatch({ type: "reset" });
     },
     [
       multiple,
@@ -679,31 +673,31 @@ export function useDropzone(options = {}) {
       onDrop,
       onDropAccepted,
       onDropRejected,
-      noDragEventsBubbling
+      noDragEventsBubbling,
     ]
-  )
+  );
 
-  const composeHandler = fn => {
-    return disabled ? null : fn
-  }
+  const composeHandler = (fn) => {
+    return disabled ? null : fn;
+  };
 
-  const composeKeyboardHandler = fn => {
-    return noKeyboard ? null : composeHandler(fn)
-  }
+  const composeKeyboardHandler = (fn) => {
+    return noKeyboard ? null : composeHandler(fn);
+  };
 
-  const composeDragHandler = fn => {
-    return noDrag ? null : composeHandler(fn)
-  }
+  const composeDragHandler = (fn) => {
+    return noDrag ? null : composeHandler(fn);
+  };
 
-  const stopPropagation = event => {
+  const stopPropagation = (event) => {
     if (noDragEventsBubbling) {
-      event.stopPropagation()
+      event.stopPropagation();
     }
-  }
+  };
 
   const getRootProps = useMemo(
     () => ({
-      refKey = 'ref',
+      refKey = "ref",
       onKeyDown,
       onFocus,
       onBlur,
@@ -714,17 +708,25 @@ export function useDropzone(options = {}) {
       onDrop,
       ...rest
     } = {}) => ({
-      onKeyDown: composeKeyboardHandler(composeEventHandlers(onKeyDown, onKeyDownCb)),
+      onKeyDown: composeKeyboardHandler(
+        composeEventHandlers(onKeyDown, onKeyDownCb)
+      ),
       onFocus: composeKeyboardHandler(composeEventHandlers(onFocus, onFocusCb)),
       onBlur: composeKeyboardHandler(composeEventHandlers(onBlur, onBlurCb)),
       onClick: composeHandler(composeEventHandlers(onClick, onClickCb)),
-      onDragEnter: composeDragHandler(composeEventHandlers(onDragEnter, onDragEnterCb)),
-      onDragOver: composeDragHandler(composeEventHandlers(onDragOver, onDragOverCb)),
-      onDragLeave: composeDragHandler(composeEventHandlers(onDragLeave, onDragLeaveCb)),
+      onDragEnter: composeDragHandler(
+        composeEventHandlers(onDragEnter, onDragEnterCb)
+      ),
+      onDragOver: composeDragHandler(
+        composeEventHandlers(onDragOver, onDragOverCb)
+      ),
+      onDragLeave: composeDragHandler(
+        composeEventHandlers(onDragLeave, onDragLeaveCb)
+      ),
       onDrop: composeDragHandler(composeEventHandlers(onDrop, onDropCb)),
       [refKey]: rootRef,
       ...(!disabled && !noKeyboard ? { tabIndex: 0 } : {}),
-      ...rest
+      ...rest,
     }),
     [
       rootRef,
@@ -738,39 +740,50 @@ export function useDropzone(options = {}) {
       onDropCb,
       noKeyboard,
       noDrag,
-      disabled
+      disabled,
     ]
-  )
+  );
 
-  const onInputElementClick = useCallback(event => {
-    event.stopPropagation()
-  }, [])
+  const onInputElementClick = useCallback((event) => {
+    event.stopPropagation();
+  }, []);
 
   const getInputProps = useMemo(
-    () => ({ refKey = 'ref', onChange, onClick, ...rest } = {}) => {
+    () => ({ refKey = "ref", onChange, onClick, ...rest } = {}) => {
       const inputProps = {
         accept,
         multiple,
-        type: 'file',
-        style: { display: 'none' },
+        type: "file",
+        style: { display: "none" },
         onChange: composeHandler(composeEventHandlers(onChange, onDropCb)),
-        onClick: composeHandler(composeEventHandlers(onClick, onInputElementClick)),
-        autoComplete: 'off',
+        onClick: composeHandler(
+          composeEventHandlers(onClick, onInputElementClick)
+        ),
+        autoComplete: "off",
         tabIndex: -1,
-        [refKey]: inputRef
-      }
+        [refKey]: inputRef,
+      };
 
       return {
         ...inputProps,
-        ...rest
-      }
+        ...rest,
+      };
     },
     [inputRef, accept, multiple, onDropCb, disabled]
-  )
+  );
 
-  const fileCount = draggedFiles.length
-  const isDragAccept = fileCount > 0 && allFilesAccepted({ files: draggedFiles, accept, minSize, maxSize, multiple, maxFiles })
-  const isDragReject = fileCount > 0 && !isDragAccept
+  const fileCount = draggedFiles.length;
+  const isDragAccept =
+    fileCount > 0 &&
+    allFilesAccepted({
+      files: draggedFiles,
+      accept,
+      minSize,
+      maxSize,
+      multiple,
+      maxFiles,
+    });
+  const isDragReject = fileCount > 0 && !isDragAccept;
 
   return {
     ...state,
@@ -781,48 +794,48 @@ export function useDropzone(options = {}) {
     getInputProps,
     rootRef,
     inputRef,
-    open: composeHandler(openFileDialog)
-  }
+    open: composeHandler(openFileDialog),
+  };
 }
 
 function reducer(state, action) {
   /* istanbul ignore next */
   switch (action.type) {
-    case 'focus':
+    case "focus":
       return {
         ...state,
-        isFocused: true
-      }
-    case 'blur':
+        isFocused: true,
+      };
+    case "blur":
       return {
         ...state,
-        isFocused: false
-      }
-    case 'openDialog':
+        isFocused: false,
+      };
+    case "openDialog":
       return {
         ...state,
-        isFileDialogActive: true
-      }
-    case 'closeDialog':
+        isFileDialogActive: true,
+      };
+    case "closeDialog":
       return {
         ...state,
-        isFileDialogActive: false
-      }
-    case 'setDraggedFiles':
+        isFileDialogActive: false,
+      };
+    case "setDraggedFiles":
       /* eslint no-case-declarations: 0 */
-      const { isDragActive, draggedFiles } = action
+      const { isDragActive, draggedFiles } = action;
       return {
         ...state,
         draggedFiles,
-        isDragActive
-      }
-    case 'setFiles':
+        isDragActive,
+      };
+    case "setFiles":
       return {
         ...state,
         acceptedFiles: action.acceptedFiles,
-        fileRejections: action.fileRejections
-      }
-    case 'reset':
+        fileRejections: action.fileRejections,
+      };
+    case "reset":
       return {
         ...state,
         isFileDialogActive: false,
@@ -830,8 +843,8 @@ function reducer(state, action) {
         draggedFiles: [],
         acceptedFiles: [],
         fileRejections: [],
-      }
+      };
     default:
-      return state
+      return state;
   }
 }

@@ -3,8 +3,8 @@ By providing `validator` prop you can specify custom validation for files.
 The value must be a function that accepts File object and returns null if file should be accepted or error object/array of error objects if file should me rejected.
 
 ```jsx harmony
-import React from 'react';
-import {useDropzone} from 'react-dropzone';
+import React from "react";
+import { useDropzone } from "react-dropzone";
 
 const maxLength = 20;
 
@@ -12,11 +12,11 @@ function nameLengthValidator(file) {
   if (file.name.length > maxLength) {
     return {
       code: "name-too-large",
-      message: `Name is larger than ${maxLength} characters`
+      message: `Name is larger than ${maxLength} characters`,
     };
   }
 
-  return null
+  return null;
 }
 
 function CustomValidation(props) {
@@ -24,12 +24,18 @@ function CustomValidation(props) {
     acceptedFiles,
     fileRejections,
     getRootProps,
-    getInputProps
+    getInputProps,
   } = useDropzone({
-    validator: nameLengthValidator
+    validator: nameLengthValidator,
+    validatorSchema: [
+      {
+        maxSize: 120,
+        accept: "image/png",
+      },
+    ],
   });
 
-  const acceptedFileItems = acceptedFiles.map(file => (
+  const acceptedFileItems = acceptedFiles.map((file) => (
     <li key={file.path}>
       {file.path} - {file.size} bytes
     </li>
@@ -39,7 +45,7 @@ function CustomValidation(props) {
     <li key={file.path}>
       {file.path} - {file.size} bytes
       <ul>
-        {errors.map(e => (
+        {errors.map((e) => (
           <li key={e.code}>{e.message}</li>
         ))}
       </ul>
@@ -48,7 +54,7 @@ function CustomValidation(props) {
 
   return (
     <section className="container">
-      <div {...getRootProps({ className: 'dropzone' })}>
+      <div {...getRootProps({ className: "dropzone" })}>
         <input {...getInputProps()} />
         <p>Drag 'n' drop some files here, or click to select files</p>
         <em>(Only files with name less than 20 characters will be accepted)</em>
@@ -63,6 +69,5 @@ function CustomValidation(props) {
   );
 }
 
-<CustomValidation />
+<CustomValidation />;
 ```
-
