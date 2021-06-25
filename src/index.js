@@ -679,7 +679,8 @@ export function useDropzone(options = {}) {
       onDrop,
       onDropAccepted,
       onDropRejected,
-      noDragEventsBubbling
+      noDragEventsBubbling,
+      validator
     ]
   )
 
